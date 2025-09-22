@@ -3,9 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/src/store/store";
+import AuthModal from "./AuthModal";
 
 export default function Navbar() {
   const [search, setSearch] = useState<string>("");
+  const { token } = useSelector((state: RootState) => state.auth);
 
   return (
     <nav className="flex items-center justify-between bg-white px-4 py-3 shadow-md">
@@ -30,18 +34,20 @@ export default function Navbar() {
           onChange={(e) => setSearch(e.target.value)}
           className="border border-gray-300 rounded-md px-3 py-1 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        <Link
-          href="/signup"
-          className="px-4 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-        >
-          Signup
-        </Link>
-        <Link
-          href="/login"
-          className="px-4 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-        >
-          Login
-        </Link>
+
+        {!token ? (
+          <>
+            <AuthModal type="signup" />
+            <AuthModal type="login" />
+          </>
+        ) : (
+          <Link
+            href="/profile"
+            className="px-4 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+          >
+            Profile
+          </Link>
+        )}
       </div>
     </nav>
   );
