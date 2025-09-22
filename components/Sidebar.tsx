@@ -12,7 +12,7 @@ import {
   History,
   ClipboardList,
   Layers,
-} from "lucide-react"; // Lightweight icons
+} from "lucide-react";
 
 const menuItems = [
   { name: "Home Page", path: "/", icon: Home },
@@ -31,8 +31,8 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="bg-gradient-to-b from-blue-50 to-blue-100 w-64 min-h-screen border-r border-gray-200 sticky top-0 hidden md:flex flex-col px-4 py-6 shadow-lg">
-      <h2 className="text-lg font-bold mb-6 text-gray-800 tracking-wide">
+    <aside className="bg-primary-light w-64 min-h-screen border-r border-gray-200 sticky top-0 hidden md:flex flex-col px-4 py-6 shadow-lg">
+      <h2 className="text-lg font-bold mb-6 text-primary tracking-wide">
         MAIN MENU
       </h2>
 
@@ -45,8 +45,8 @@ export default function Sidebar() {
               href={path}
               className={`flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 ${
                 isActive
-                  ? "bg-blue-500 text-white shadow-md"
-                  : "text-gray-700 hover:bg-blue-200 hover:text-gray-900"
+                  ? "bg-primary font-primary shadow-md"
+                  : "font-primary-lightest-bg hover:bg-primary-light"
               }`}
             >
               <Icon size={18} />
