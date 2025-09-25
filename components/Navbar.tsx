@@ -2,14 +2,27 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "@/src/store/store";
+import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "@/src/store/store";
 import AuthModal from "./AuthModal";
+import { loadFromStorage, logout } from "@/src/features/auth/authSlice";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const [search, setSearch] = useState<string>("");
+  const dispatch = useDispatch<AppDispatch>();
   const { token } = useSelector((state: RootState) => state.auth);
+  const router = useRouter();
+
+  useEffect(() => {
+    dispatch(loadFromStorage());
+  }, [dispatch]);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    router.push("/");
+  };
 
   return (
     <nav className="flex items-center justify-between bg-white px-4 py-3 shadow-md">
@@ -41,12 +54,20 @@ export default function Navbar() {
             <AuthModal type="login" />
           </>
         ) : (
-          <Link
-            href="/profile"
-            className="px-4 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
-          >
-            Profile
-          </Link>
+          <div className="flex items-center space-x-4">
+            <Link
+              href="/profile"
+              className="px-4 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+            >
+              Profile
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+            >
+              Logout
+            </button>
+          </div>
         )}
       </div>
     </nav>

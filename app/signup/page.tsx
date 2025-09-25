@@ -42,9 +42,6 @@ export default function LoginPage() {
 
       // Save to redux
       dispatch(setCredentials({ user: { email }, token }));
-
-      // Redirect to dashboard
-      router.push("/dashboard");
     } catch (err: any) {
       setError(err);
     } finally {

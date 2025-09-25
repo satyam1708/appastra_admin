@@ -1,3 +1,4 @@
+//src/store/store.ts
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "../features/auth/authSlice";
 import coursesReducer from "../features/courses/coursesSlice";

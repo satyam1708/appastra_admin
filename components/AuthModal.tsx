@@ -43,7 +43,6 @@ export default function AuthModal({ type }: AuthModalProps) {
       const token = await dispatch(verifyOtp({ email, otp })).unwrap();
       dispatch(setCredentials({ user: { email }, token }));
       setOpen(false); // close modal
-      router.push("/dashboard");
     } catch (err: any) {
       setError(err);
     } finally {
