@@ -12,6 +12,7 @@ import adminReducer from "../features/admin/adminSlice";
 import crmReducer from "../features/crm/crmSlice";
 import liveReducer from "../features/live/liveSlice";
 import testReducer from "../features/tests/testSlice";
+import enrollmentReducer from "../features/enrollments/enrollmentSlice"; // 1. Import the new reducer
 
 export const store = configureStore({
   reducer: {
@@ -27,6 +28,7 @@ export const store = configureStore({
     crm: crmReducer,
     live: liveReducer,
     tests: testReducer,
+    enrollments: enrollmentReducer, // 2. Add it to the reducer object
   },
 });
 
