@@ -17,8 +17,8 @@ import {
 
 const menuItems = [
   { name: "Home Page", path: "/", icon: Home },
-  { name: "Paid Courses", path: "/paid-courses", icon: BookOpen },
-  { name: "Free Courses", path: "/free-courses", icon: BookOpen },
+  { name: "Paid Courses", path: "/courses/paid-courses", icon: BookOpen },
+  { name: "Free Courses", path: "/courses/free-courses", icon: BookOpen },
   { name: "Test Series", path: "/test-series", icon: ClipboardList },
   { name: "YouTube PDF", path: "/youtube-pdf", icon: Video },
   { name: "Free Quiz", path: "/free-quiz", icon: HelpCircle },
