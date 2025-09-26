@@ -8,6 +8,10 @@ import paymentReducer from "../features/payment/paymentSlice";
 import classesReducer from "../features/classes/classesSlice";
 import notificationsReducer from "../features/notifications/notificationsSlice";
 import materialsReducer from "../features/materials/materialsSlice";
+import adminReducer from "../features/admin/adminSlice";
+import crmReducer from "../features/crm/crmSlice";
+import liveReducer from "../features/live/liveSlice";
+
 
 export const store = configureStore({
   reducer: {
@@ -19,6 +23,9 @@ export const store = configureStore({
     classes: classesReducer,
     notifications: notificationsReducer,
     materials: materialsReducer,
+    admin: adminReducer,
+    crm: crmReducer,
+    live: liveReducer,
   },
 });
 

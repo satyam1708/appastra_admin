@@ -62,3 +62,32 @@ export interface User {
       notes: any[];
       created_at: number;
   }
+
+  export interface AdminStats {
+    totalUsers: number;
+    totalCourses: number;
+    totalEnrollments: number;
+    totalRevenue: number;
+  }
+  
+  export interface Lead {
+    id: string;
+    name: string;
+    email?: string;
+    phone?: string;
+    source?: string;
+    status: 'NEW' | 'CONTACTED' | 'CONVERTED' | 'LOST';
+    assignedTo?: string;
+    salesUser?: User;
+    createdAt: string;
+    updatedAt: string;
+  }
+  
+  export interface LiveSession {
+    id: string;
+    classId: string;
+    sessionUrl: string; // Ingest URL for teacher
+    playbackUrl?: string; // Playback URL for students
+    startedAt: string;
+    endedAt?: string;
+  }

@@ -1,0 +1,30 @@
+// src/features/crm/crmThunks.ts
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import api from '@/src/lib/api';
+import { Lead } from '@/src/types';
+
+type LeadInput = Omit<Lead, 'id' | 'createdAt' | 'updatedAt' | 'status'>;
+
+export const createLead = createAsyncThunk<Lead, LeadInput, { rejectValue: string }>(
+  'crm/createLead',
+  async (leadData, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/crm/leads', leadData);
+      return response.data.data;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to create lead');
+    }
+  }
+);
+
+export const fetchLeads = createAsyncThunk<any, { page?: number; limit?: number; status?: string }, { rejectValue: string }>(
+  'crm/fetchLeads',
+  async ({ page = 1, limit = 10, status }, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/crm/leads?page=${page}&limit=${limit}${status ? `&status=${status}` : ''}`);
+      return response.data.data;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to fetch leads');
+    }
+  }
+);
