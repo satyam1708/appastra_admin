@@ -4,12 +4,7 @@ export interface User {
   id: string;
   email: string;
   name?: string;
-  phone?: string;
-  state?: string;
-  username?: string;
-  role: "STUDENT" | "TEACHER" | "ADMIN";
-  isVerified: boolean;
-  createdAt: string;
+  role: 'STUDENT' | 'TEACHER' | 'ADMIN';
 }
 
 export interface Course {
@@ -18,15 +13,21 @@ export interface Course {
   description?: string;
   isPaid: boolean;
   price?: number;
-  teacher?: User;
-  subjects?: Subject[];
+  subjects: Subject[];
 }
 
 export interface Subject {
   id: string;
   name: string;
   description?: string;
-  classes?: Class[];
+}
+
+export interface Resource {
+  id: string;
+  title: string;
+  type: 'PDF' | 'YOUTUBE' | 'QUIZ' | 'NCERT_BOOK' | 'PREVIOUS_YEAR' | 'SYLLABUS';
+  url?: string;
+  signedUrl?: string;
 }
 
 export interface Class {
@@ -86,8 +87,8 @@ export interface Lead {
 export interface LiveSession {
   id: string;
   classId: string;
-  sessionUrl: string; // Ingest URL for teacher
-  playbackUrl?: string; // Playback URL for students
+  sessionUrl: string;
+  playbackUrl?: string;
   startedAt: string;
   endedAt?: string;
 }

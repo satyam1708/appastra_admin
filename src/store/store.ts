@@ -1,5 +1,6 @@
 // src/store/store.ts
 import { configureStore } from "@reduxjs/toolkit";
+import api, { setupInterceptors } from "../lib/api"; // 👈 Import api and setupInterceptors
 import authReducer from "../features/auth/authSlice";
 import coursesReducer from "../features/courses/coursesSlice";
 import userReducer from "../features/user/userSlice";
@@ -13,7 +14,7 @@ import crmReducer from "../features/crm/crmSlice";
 import liveReducer from "../features/live/liveSlice";
 import testReducer from "../features/tests/testSlice";
 import enrollmentReducer from "../features/enrollments/enrollmentSlice";
-import progressReducer from "../features/progress/progressSlice"; // 1. Import the new reducer
+import progressReducer from "../features/progress/progressSlice";
 
 export const store = configureStore({
   reducer: {
@@ -30,9 +31,12 @@ export const store = configureStore({
     live: liveReducer,
     tests: testReducer,
     enrollments: enrollmentReducer,
-    progress: progressReducer, // 2. Add it to the reducer object
+    progress: progressReducer,
   },
 });
+
+// 👈 Call the setup function here
+setupInterceptors(store);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
