@@ -1,13 +1,13 @@
 // src/features/materials/materialsThunks.ts
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import api from '@/src/lib/api';
-import { Resource } from '@/src/types';
 
 export const fetchAllMaterials = createAsyncThunk<any, void, { rejectValue: string }>(
   'materials/fetchAll',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get('/materials');
+      // ✅ CORRECTED PATH
+      const response = await api.get('/materials/resources');
       return response.data;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message || 'Failed to fetch materials');
@@ -15,7 +15,8 @@ export const fetchAllMaterials = createAsyncThunk<any, void, { rejectValue: stri
   }
 );
 
-export const fetchSyllabus = createAsyncThunk<Resource[], void, { rejectValue: string }>(
+// Keep the other thunks as they are
+export const fetchSyllabus = createAsyncThunk<any, void, { rejectValue: string }>(
   'materials/fetchSyllabus',
   async (_, { rejectWithValue }) => {
     try {
@@ -27,7 +28,7 @@ export const fetchSyllabus = createAsyncThunk<Resource[], void, { rejectValue: s
   }
 );
 
-export const fetchPreviousPapers = createAsyncThunk<Resource[], void, { rejectValue: string }>(
+export const fetchPreviousPapers = createAsyncThunk<any, void, { rejectValue: string }>(
     'materials/fetchPreviousPapers',
     async (_, { rejectWithValue }) => {
       try {
