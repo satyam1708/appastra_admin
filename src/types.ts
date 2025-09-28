@@ -177,3 +177,12 @@ export interface QuizQuestion {
   options: any; // JSON field
   explanation?: string;
 }
+
+export interface Coupon {
+  id: string;
+  code: string;
+  discountPercent: number;
+  maxDiscount?: number;
+  validUntil: string;
+  isActive: boolean;
+}
