@@ -10,16 +10,16 @@ interface CourseCardProps {
 }
 
 export default function CourseCard({ course }: CourseCardProps) {
-  // Determine the correct path based on whether the course is paid or free
-  const coursePath = course.isPaid ? "/paid-courses" : "/free-courses";
+  const courseTypePath = course.isPaid ? "paid-courses" : "free-courses";
 
   return (
     <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer group">
-      <Link href={`${coursePath}/${course.id}`}>
+      {/* 👇 FIX: Use course.slug in the link */}
+      <Link href={`/courses/${courseTypePath}/${course.slug}`}>
+        {/* ... rest of the component is unchanged */}
         <div className="relative h-48 w-full overflow-hidden rounded-t-2xl">
-          {/* Placeholder image, replace with actual course image if available */}
           <Image
-            src="/images/img1.png" 
+            src={course.imageUrl || "/images/img1.png"} 
             alt={course.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"

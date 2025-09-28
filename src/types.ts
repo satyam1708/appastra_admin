@@ -13,6 +13,8 @@ export interface Course {
   description?: string;
   isPaid: boolean;
   price?: number;
+  slug: string;
+  imageUrl?: string;
   subjects: Subject[];
 }
 
