@@ -1,7 +1,7 @@
 // app/courses/[courseType]/[courseSlug]/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react"; 
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/src/store/store";
 import { fetchCourseBySlug } from "@/src/features/courses/coursesThunks";
@@ -12,12 +12,13 @@ import PurchaseModal from "@/components/PurchaseModal"; // 👈 Import the new m
 import { openAuthModal } from "@/src/features/auth/authSlice"; // 👈 Import auth modal action
 
 interface PageProps {
-  params: { courseSlug: string };
+  params: Promise<{ courseSlug: string }>;
 }
 
 type Tab = "description" | "classes" | "notes" | "tests";
 
 export default function CourseDetailPage({ params }: PageProps) {
+  const { courseSlug } = use(params);
   const dispatch = useDispatch<AppDispatch>();
   const { currentCourse, loading, error } = useSelector(
     (state: RootState) => state.courses
@@ -27,10 +28,10 @@ export default function CourseDetailPage({ params }: PageProps) {
   const [activeTab, setActiveTab] = useState<Tab>("classes");
 
   useEffect(() => {
-    if (params.courseSlug) {
-      dispatch(fetchCourseBySlug(params.courseSlug));
+    if (courseSlug) {
+      dispatch(fetchCourseBySlug(courseSlug));
     }
-  }, [dispatch, params.courseSlug]);
+  }, [dispatch, courseSlug]);
   
   // 👇 NEW: Handle Buy Now click
   const handleBuyNowClick = () => {
