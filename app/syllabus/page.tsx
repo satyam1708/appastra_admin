@@ -25,13 +25,10 @@ const SyllabusCard = ({ item }: { item: Resource }) => (
 
 export default function SyllabusPage() {
   const dispatch = useDispatch<AppDispatch>();
-  // We'll need a new state slice for syllabus, or to adapt the materialsSlice
-  // For simplicity, let's assume a new slice `syllabus` in the store
   const { syllabus, loading, error } = useSelector((state: RootState) => state.materials);
 
 
   useEffect(() => {
-    // @ts-ignore
     dispatch(fetchSyllabus());
   }, [dispatch]);
 

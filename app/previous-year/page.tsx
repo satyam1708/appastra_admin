@@ -25,11 +25,9 @@ const PaperCard = ({ paper }: { paper: Resource }) => (
 
 export default function PreviousYearPage() {
   const dispatch = useDispatch<AppDispatch>();
-  // Assuming a new slice `previousPapers` in the store, or adapt materialsSlice
   const { previousPapers, loading, error } = useSelector((state: RootState) => state.materials);
 
   useEffect(() => {
-    // @ts-ignore
     dispatch(fetchPreviousPapers());
   }, [dispatch]);
 
