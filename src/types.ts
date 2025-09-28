@@ -162,3 +162,16 @@ export interface Progress {
   subjectId?: string;
   courseId?: string;
 }
+export interface Quiz {
+  id: string;
+  title: string;
+  isPaid: boolean;
+  quizquestions: QuizQuestion[];
+}
+
+export interface QuizQuestion {
+  id: string;
+  text: string;
+  options: any; // JSON field
+  explanation?: string;
+}
