@@ -1,9 +1,7 @@
-// src/features/auth/authSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { requestOtp, verifyOtp, registerUser } from './authThunks';
 import { User } from '@/src/types';
 
-// This interface defines the complete state for your authentication flow
 interface AuthState {
   user: User | null;
   token: string | null;
@@ -30,10 +28,9 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    // 👇 FIX: These are the functions your components need
     openAuthModal: (state) => {
       state.isAuthModalOpen = true;
-      state.authStep = 'email';
+      state.authStep = 'email'; // Always start at the email step
       state.error = null;
     },
     closeAuthModal: (state) => {
@@ -42,13 +39,13 @@ const authSlice = createSlice({
     setAuthStep: (state, action: PayloadAction<'email' | 'otp' | 'register'>) => {
       state.authStep = action.payload;
     },
-    // This action will be used to safely load the token on the client
+    // Safely loads token on the client-side to prevent hydration errors
     loadTokenFromStorage: (state) => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            state.token = token;
-            state.isAuthenticated = true;
-        }
+      const token = localStorage.getItem('token');
+      if (token) {
+        state.token = token;
+        state.isAuthenticated = true;
+      }
     },
     logout: (state) => {
       state.user = null;
@@ -58,7 +55,6 @@ const authSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // This handles the async logic
     builder
       .addCase(requestOtp.pending, (state) => {
         state.loading = true;
@@ -81,6 +77,7 @@ const authSlice = createSlice({
           state.isAuthModalOpen = false;
           localStorage.setItem('token', action.payload.token);
         } else {
+          state.emailForOtp = action.payload.email; // Carry email over to register
           state.authStep = 'register';
         }
       })
