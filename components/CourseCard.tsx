@@ -14,12 +14,11 @@ export default function CourseCard({ course }: CourseCardProps) {
 
   return (
     <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer group">
-      {/* 👇 FIX: Use course.slug in the link */}
+      {/* 👇 FIX: The link now uses course.slug instead of course.id */}
       <Link href={`/courses/${courseTypePath}/${course.slug}`}>
-        {/* ... rest of the component is unchanged */}
         <div className="relative h-48 w-full overflow-hidden rounded-t-2xl">
           <Image
-            src={course.imageUrl || "/images/img1.png"} 
+            src={course.imageUrl || "/images/img1.png"}
             alt={course.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"

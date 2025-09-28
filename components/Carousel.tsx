@@ -6,37 +6,36 @@ import Image from "next/image";
 import Link from "next/link";
 import { Course } from "@/src/types";
 
-// Placeholder images for the carousel
-const images = [
-  "/images/img1.png",
-  "/images/img2.png",
-  "/images/img3.png",
-  "/images/img4.png",
-  "/images/img5.png",
-];
-
 export default function Carousel({ courses }: { courses: Course[] }) {
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % courses.length);
-    }, 4000);
-    return () => clearInterval(timer);
+    if (courses.length > 1) {
+      const timer = setInterval(() => {
+        setCurrent((prev) => (prev + 1) % courses.length);
+      }, 4000);
+      return () => clearInterval(timer);
+    }
   }, [courses.length]);
 
   if (!courses || courses.length === 0) {
-    return null; // Don't render if there are no courses
+    return (
+      <div className="relative w-full max-w-7xl mx-auto h-[520px] rounded-3xl shadow-lg bg-gray-200 flex items-center justify-center">
+        {/* Placeholder for when courses are loading */}
+      </div>
+    );
   }
 
-  const coursePath = (course: Course) => course.isPaid ? "paid-courses" : "free-courses";
+  const coursePath = (course: Course) =>
+    course.isPaid ? "paid-courses" : "free-courses";
+  const currentCourse = courses[current];
 
   return (
     <div className="relative w-full max-w-7xl mx-auto h-[520px] rounded-3xl shadow-lg overflow-hidden border border-blue-100">
-      <Link href={`/courses/${coursePath(courses[current])}/${courses[current].id}`}>
+      <Link href={`/courses/${coursePath(currentCourse)}/${currentCourse.slug}`}>
         <Image
-          src={images[current % images.length]} // Cycle through placeholder images
-          alt={courses[current]?.name || "Course Image"}
+          src={currentCourse.imageUrl || `/images/img${(current % 5) + 1}.png`}
+          alt={currentCourse.name}
           fill
           className="object-cover transition-transform duration-700 ease-in-out"
           priority

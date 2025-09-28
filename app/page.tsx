@@ -12,25 +12,31 @@ import { Course } from "@/src/types";
 
 export default function Home() {
   const dispatch = useDispatch<AppDispatch>();
-  const { courses, loading, error } = useSelector((state: RootState) => state.courses);
+  const { courses, loading, error } = useSelector(
+    (state: RootState) => state.courses
+  );
 
   useEffect(() => {
-    dispatch(fetchCourses());
-  }, [dispatch]);
+    // Fetch courses only if they haven't been loaded yet
+    if (courses.length === 0) {
+      dispatch(fetchCourses());
+    }
+  }, [dispatch, courses.length]);
 
-  // We can select a few courses for the carousel, e.g., the first 5
+  // Select the first 5 courses for the carousel
   const carouselCourses = courses.slice(0, 5);
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-white via-sky-50 to-white">
-      {loading && <p className="text-center p-10">Loading Courses...</p>}
-      {error && <p className="text-center p-10 text-red-500">{error}</p>}
-      {!loading && !error && (
-        <>
-          <Carousel courses={carouselCourses} />
-          <FeaturedCourses courses={courses} />
-        </>
+      {loading && courses.length === 0 && (
+        <p className="text-center p-10">Loading Courses...</p>
       )}
+      {error && <p className="text-center p-10 text-red-500">{error}</p>}
+      
+      {/* Pass the fetched courses as props */}
+      <Carousel courses={carouselCourses} />
+      <FeaturedCourses courses={courses} />
+      
       <AboutSection />
     </div>
   );
