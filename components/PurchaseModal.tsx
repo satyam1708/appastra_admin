@@ -1,4 +1,4 @@
-// components/PurchaseModal.tsx
+// components/PurchaseModal.tsx - UPDATED
 "use client";
 
 import { useState } from 'react';
@@ -21,8 +21,9 @@ export default function PurchaseModal({ course, onClose }: PurchaseModalProps) {
 
   const GST_RATE = 0.18; // 18% GST
   const basePrice = course.price || 0;
-  const gstAmount = (basePrice - discount) * GST_RATE;
-  const totalPrice = (basePrice - discount) + gstAmount;
+  const priceAfterDiscount = basePrice - discount;
+  const gstAmount = priceAfterDiscount * GST_RATE;
+  const totalPrice = priceAfterDiscount + gstAmount;
 
   const handleApplyCoupon = () => {
     if (couponCode.trim()) {
@@ -30,12 +31,6 @@ export default function PurchaseModal({ course, onClose }: PurchaseModalProps) {
     }
   };
 
-  const handlePaymentSuccess = (response: any) => {
-    console.log("Payment successful from modal:", response);
-    alert("Payment successful! You are now enrolled.");
-    onClose();
-  };
-  
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
@@ -67,7 +62,7 @@ export default function PurchaseModal({ course, onClose }: PurchaseModalProps) {
             <span>₹{basePrice.toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-green-600">
-            <span>Net Discount</span>
+            <span>Discount</span>
             <span>- ₹{discount.toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
@@ -76,7 +71,7 @@ export default function PurchaseModal({ course, onClose }: PurchaseModalProps) {
           </div>
           <hr className="my-2"/>
           <div className="flex justify-between font-bold text-lg">
-            <span>Total</span>
+            <span>Total to Pay</span>
             <span>₹{totalPrice.toFixed(2)}</span>
           </div>
         </div>
@@ -85,9 +80,9 @@ export default function PurchaseModal({ course, onClose }: PurchaseModalProps) {
         <div className="space-y-3">
           <PaymentButton
             amount={totalPrice * 100} // Amount in paise
-            onSuccess={handlePaymentSuccess}
             courseId={course.id}
             couponCode={coupon?.code} // Pass the validated coupon code
+            onSuccess={onClose} // Pass onClose to the button
           />
           <button
             onClick={() => {
