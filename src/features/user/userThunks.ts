@@ -26,3 +26,15 @@ export const updateUserProfile = createAsyncThunk<User, Partial<User>, { rejectV
     }
   }
 );
+
+export const fetchUserTransactions = createAsyncThunk<any[], void, { rejectValue: string }>(
+  'user/fetchTransactions',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/users/transactions');
+      return response.data.data;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to fetch transactions');
+    }
+  }
+);
