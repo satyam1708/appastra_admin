@@ -1,58 +1,58 @@
-// app/purchases/page.tsx - NEW FILE
+// app/purchases/page.tsx - UPDATED
 "use client";
 
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/src/store/store';
-import { fetchUserTransactions } from '@/src/features/user/userThunks';
+import { fetchUserEnrollments } from '@/src/features/enrollments/enrollmentThunks';
+import { Enrollment } from '@/src/types';
+import Link from 'next/link';
+import Image from 'next/image';
 
 export default function PurchasesPage() {
   const dispatch = useDispatch<AppDispatch>();
-  const { transactions, loading, error } = useSelector((state: RootState) => state.user);
+  const { enrollments, loading, error } = useSelector((state: RootState) => state.enrollments);
 
   useEffect(() => {
-    dispatch(fetchUserTransactions());
+    dispatch(fetchUserEnrollments());
   }, [dispatch]);
 
-  if (loading) return <p className="text-center p-10">Loading your purchases...</p>;
+  if (loading) return <p className="text-center p-10">Loading your courses...</p>;
   if (error) return <p className="text-center p-10 text-red-500">Error: {error}</p>;
 
   return (
-    <div className="container mx-auto max-w-4xl p-4">
-      <h1 className="text-3xl font-bold mb-6 text-sky-900">My Purchases</h1>
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {transactions.map((tx) => (
-              <tr key={tx.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {tx.course?.name || tx.testSeries?.title || 'Item'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  ₹{tx.amount.toFixed(2)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      tx.status === 'SUCCESS' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
-                    {tx.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(tx.createdAt).toLocaleDateString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="container mx-auto max-w-6xl p-4">
+      <h1 className="text-3xl font-bold mb-6 text-sky-900">My Courses</h1>
+      {enrollments.length === 0 && !loading && (
+        <p>You have not purchased any courses yet.</p>
+      )}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {enrollments.map((enrollment: Enrollment) => (
+          enrollment.course && (
+            <Link 
+              key={enrollment.id} 
+              href={`/courses/${enrollment.course.isPaid ? 'paid-courses' : 'free-courses'}/${enrollment.course.slug}`}
+              className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 group"
+            >
+              <div className="relative h-48 w-full">
+                <Image
+                  src={enrollment.course.imageUrl || "/images/img1.png"}
+                  alt={enrollment.course.name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="p-5">
+                <h3 className="text-lg font-semibold text-sky-900 mb-2 truncate">
+                  {enrollment.course.name}
+                </h3>
+                <span className="w-full text-center px-4 py-2 block bg-blue-600 text-white text-sm rounded-full shadow-md hover:bg-blue-700 transition">
+                  Go to Course
+                </span>
+              </div>
+            </Link>
+          )
+        ))}
       </div>
     </div>
   );

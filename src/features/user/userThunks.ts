@@ -38,3 +38,15 @@ export const fetchUserTransactions = createAsyncThunk<any[], void, { rejectValue
     }
   }
 );
+
+export const changePassword = createAsyncThunk<
+  void,
+  { oldPassword: string; newPassword: string },
+  { rejectValue: string }
+>('user/changePassword', async (passwordData, { rejectWithValue }) => {
+  try {
+    await api.patch('/users/password', passwordData);
+  } catch (err: any) {
+    return rejectWithValue(err.response?.data?.message || 'Failed to change password');
+  }
+});
