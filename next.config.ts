@@ -2,7 +2,15 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: [], // add domains if you use external images
+    // Add the remotePatterns configuration here
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'example.com',
+        port: '',
+        pathname: '/images/**',
+      },
+    ],
   },
 };
 

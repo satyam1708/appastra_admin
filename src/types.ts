@@ -4,8 +4,11 @@ export interface User {
   id: string;
   email: string;
   name?: string;
+  phone?: string;
+  state?: string;
   role: 'STUDENT' | 'TEACHER' | 'ADMIN';
 }
+
 export interface Batch {
   id: string;
   name: string;
@@ -19,21 +22,25 @@ export interface Course {
   description?: string;
   isPaid: boolean;
   price?: number;
-  slug: string; 
+  slug: string;
   imageUrl?: string;
   subjects: Subject[];
   batches: Batch[];
+  teacher?: { name: string; };
 }
 
 export interface Subject {
   id: string;
   name: string;
   description?: string;
+  classes?: Class[];
+  resources?: Resource[];
 }
 
 export interface Resource {
   id: string;
   title: string;
+  description?: string;
   type: 'PDF' | 'YOUTUBE' | 'QUIZ' | 'NCERT_BOOK' | 'PREVIOUS_YEAR' | 'SYLLABUS';
   url?: string;
   signedUrl?: string;
@@ -47,6 +54,16 @@ export interface Class {
   isLive: boolean;
   startTime?: string;
   endTime?: string;
+}
+
+// ✅ CORRECTED: Single, accurate Enrollment definition
+export interface Enrollment {
+  id: string;
+  userId: string;
+  courseId: string;
+  batchId?: string;
+  course: Course; // Includes the full Course object
+  batch?: Batch;  // Includes the optional Batch object
 }
 
 export interface Notification {
@@ -101,6 +118,7 @@ export interface LiveSession {
   startedAt: string;
   endedAt?: string;
 }
+
 export interface TestSeries {
   id: string;
   title: string;
@@ -126,6 +144,7 @@ export interface TestQuestion {
   marks: number;
 }
 
+// ✅ CORRECTED: Single, accurate Quiz & QuizQuestion definition
 export interface Quiz {
   id: string;
   title: string;
@@ -156,13 +175,6 @@ export interface QuizAttempt {
   quizId: string;
 }
 
-export interface Enrollment {
-  id: string;
-  userId: string;
-  courseId: string;
-  batchId?: string;
-}
-
 export interface Progress {
   id: string;
   percentage: number;
@@ -170,19 +182,6 @@ export interface Progress {
   classId?: string;
   subjectId?: string;
   courseId?: string;
-}
-export interface Quiz {
-  id: string;
-  title: string;
-  isPaid: boolean;
-  quizquestions: QuizQuestion[];
-}
-
-export interface QuizQuestion {
-  id: string;
-  text: string;
-  options: any; // JSON field
-  explanation?: string;
 }
 
 export interface Coupon {
