@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { store } from "../src/store/store";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
+import CourseGoalManager from "../components/CourseGoalManager";
 import Footer from "../components/Footer";
 import "./globals.css";
 import '../src/styles/theme.css';
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-gray-50 min-h-screen">
         <Provider store={store}>
           <QueryClientProvider client={queryClient}>
+          <CourseGoalManager /> 
             {/* Fixed Navbar */}
             <div className="fixed top-0 left-0 w-full z-50">
               <Navbar />

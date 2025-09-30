@@ -10,7 +10,8 @@ import { openAuthModal, loadTokenFromStorage, logout } from "@/src/features/auth
 import { useRouter } from "next/navigation";
 import AuthModal from "./AuthModal";
 import ProfileDropdown from "./ProfileDropdown";
-import { Search, Menu, X } from 'lucide-react';
+import { Search, Menu, X,ChevronDown } from 'lucide-react';
+import { openCourseGoalModal } from "@/src/features/courseGoal/courseGoalSlice";
 
 // ✅ NEW: Expanded search mapping with labels for the UI
 const searchRoutes: { label: string; path: string; keywords: string[] }[] = [
@@ -24,6 +25,7 @@ const searchRoutes: { label: string; path: string; keywords: string[] }[] = [
 
 export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
+  const { selectedCourse } = useSelector((state: RootState) => state.courseGoal);
   const [searchResults, setSearchResults] = useState<{label: string; path: string}[]>([]);
   const dispatch = useDispatch<AppDispatch>();
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
@@ -79,7 +81,7 @@ export default function Navbar() {
     <>
       <AuthModal />
       <header className="bg-white sticky top-0 z-40 shadow-sm">
-        <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <nav className="container mx-2 px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             
             <div className="flex items-center gap-4">
@@ -132,6 +134,18 @@ export default function Navbar() {
 
             {/* Auth buttons / Profile Icon for Desktop */}
             <div className="hidden md:flex items-center space-x-4">
+              {/* Selected Course Display */}
+              {selectedCourse && (
+                <div className="hidden md:flex items-center ml-4">
+                  <button 
+                    onClick={() => dispatch(openCourseGoalModal())}
+                    className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-blue-600"
+                  >
+                    <span>{selectedCourse.name}</span>
+                    <ChevronDown size={16} />
+                  </button>
+                </div>
+              )}
               {isClient && (
                 isAuthenticated ? (
                   <>
@@ -165,6 +179,21 @@ export default function Navbar() {
         {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden bg-white border-t p-4">
+            {/* Selected Course Display for Mobile */}
+            {selectedCourse && (
+                <div className="mb-4">
+                  <button 
+                    onClick={() => {
+                      dispatch(openCourseGoalModal());
+                      setIsMenuOpen(false);
+                    }}
+                    className="flex w-full items-center justify-between gap-2 p-2 rounded-md bg-gray-100 text-sm font-semibold text-gray-700 hover:text-blue-600"
+                  >
+                    <span>Goal: {selectedCourse.name}</span>
+                    <ChevronDown size={16} />
+                  </button>
+                </div>
+              )}
             {isClient && (
               isAuthenticated ? (
                 <div className="flex items-center justify-between">

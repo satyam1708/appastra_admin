@@ -1,32 +1,29 @@
 // components/CourseSelectionModal.tsx
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/src/store/store';
 import { fetchCourses } from '@/src/features/courses/coursesThunks';
+import { setCourseGoal, closeCourseGoalModal } from '@/src/features/courseGoal/courseGoalSlice';
 import { Course } from '@/src/types';
 
-interface CourseSelectionModalProps {
-  onClose: () => void;
-}
-
-export default function CourseSelectionModal({ onClose }: CourseSelectionModalProps) {
+export default function CourseSelectionModal() {
   const dispatch = useDispatch<AppDispatch>();
   const { courses, loading, error } = useSelector((state: RootState) => state.courses);
+  const { isModalOpen } = useSelector((state: RootState) => state.courseGoal);
 
   useEffect(() => {
-    // Fetch courses if they are not already in the state
-    if (courses.length === 0) {
+    if (isModalOpen && courses.length === 0) {
       dispatch(fetchCourses());
     }
-  }, [dispatch, courses.length]);
+  }, [dispatch, isModalOpen, courses.length]);
 
   const handleCourseSelect = (course: Course) => {
-    // Save the user's preferred course to localStorage
-    localStorage.setItem('selectedCourse', JSON.stringify(course));
-    onClose();
+    dispatch(setCourseGoal(course));
   };
+
+  if (!isModalOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
@@ -52,7 +49,7 @@ export default function CourseSelectionModal({ onClose }: CourseSelectionModalPr
         </div>
         
         <button
-          onClick={onClose}
+          onClick={() => dispatch(closeCourseGoalModal())}
           className="mt-6 w-full text-center p-3 bg-gray-100 rounded-md hover:bg-gray-200"
         >
           Skip for Now

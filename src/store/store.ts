@@ -15,6 +15,7 @@ import liveReducer from "../features/live/liveSlice";
 import testReducer from "../features/tests/testSlice";
 import enrollmentReducer from "../features/enrollments/enrollmentSlice";
 import progressReducer from "../features/progress/progressSlice";
+import courseGoalReducer from "../features/courseGoal/courseGoalSlice";
 
 export const store = configureStore({
   reducer: {
@@ -32,6 +33,7 @@ export const store = configureStore({
     tests: testReducer,
     enrollments: enrollmentReducer,
     progress: progressReducer,
+    courseGoal: courseGoalReducer,
   },
 });
 
