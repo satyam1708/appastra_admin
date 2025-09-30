@@ -5,17 +5,9 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/src/store/store';
 import { fetchUserEnrollments } from '@/src/features/enrollments/enrollmentThunks';
-import { Enrollment } from '@/src/types'; // Make sure Enrollment includes Batch
+import { Enrollment } from '@/src/types';
 import Link from 'next/link';
 import Image from 'next/image';
-
-// Update your Enrollment type in src/types.ts to include the batch name
-// export interface Enrollment {
-//   id: string;
-//   // ... other fields
-//   batch?: { name: string; }; 
-//   course: Course;
-// }
 
 export default function PurchasesPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -51,15 +43,9 @@ export default function PurchasesPage() {
                 />
               </div>
               <div className="p-5">
-                <h3 className="text-lg font-semibold text-sky-900 mb-1 truncate">
+                <h3 className="text-lg font-semibold text-sky-900 mb-2 truncate">
                   {enrollment.course.name}
                 </h3>
-                {/* Display Batch Name if available */}
-                {enrollment.batch?.name && (
-                  <p className="text-sm text-gray-500 mb-3 bg-gray-100 px-2 py-1 rounded-full inline-block">
-                    Batch: {enrollment.batch.name}
-                  </p>
-                )}
                 <span className="w-full text-center px-4 py-2 block bg-blue-600 text-white text-sm rounded-full shadow-md hover:bg-blue-700 transition">
                   Go to Course
                 </span>

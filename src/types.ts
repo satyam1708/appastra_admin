@@ -6,6 +6,12 @@ export interface User {
   name?: string;
   role: 'STUDENT' | 'TEACHER' | 'ADMIN';
 }
+export interface Batch {
+  id: string;
+  name: string;
+  startDate: string;
+  endDate?: string;
+}
 
 export interface Course {
   id: string;
@@ -13,9 +19,10 @@ export interface Course {
   description?: string;
   isPaid: boolean;
   price?: number;
-  slug: string;
+  slug: string; 
   imageUrl?: string;
   subjects: Subject[];
+  batches: Batch[];
 }
 
 export interface Subject {
