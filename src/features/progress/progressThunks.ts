@@ -16,7 +16,7 @@ export const fetchCourseProgress = createAsyncThunk<Progress, string, { rejectVa
       return response.data.data;
     } catch (err: unknown) {
       const error = err as AxiosError<KnownError>;
-      return rejectWithValue('Failed to fetch progress');
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch progress');
     }
   }
 );
@@ -29,7 +29,7 @@ export const updateClassProgress = createAsyncThunk<Progress, string, { rejectVa
         return response.data.data;
       } catch (err: unknown) {
         const error = err as AxiosError<KnownError>;
-        return rejectWithValue('Failed to update progress');
+        return rejectWithValue(error.response?.data?.message || 'Failed to update progress');
       }
     }
   );

@@ -34,7 +34,7 @@ export const updateUserProfile = createAsyncThunk<User, Partial<User>, { rejectV
   }
 );
 
-export const fetchUserTransactions = createAsyncThunk<any[], void, { rejectValue: string }>(
+export const fetchUserTransactions = createAsyncThunk<Record<string, unknown>[], void, { rejectValue: string }>(
   'user/fetchTransactions',
   async (_, { rejectWithValue }) => {
     try {

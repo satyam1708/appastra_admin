@@ -1,4 +1,4 @@
-// src/features/auth/authThunks.ts - CORRECTED
+// src/features/auth/authThunks.ts
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios, { AxiosError } from "axios";
 
@@ -19,7 +19,7 @@ export const requestOtp = createAsyncThunk(
   "auth/requestOtp",
   async (email: string, { rejectWithValue }) => {
     try {
-      const res = await axios.post(`${API_BASE}/auth/request-otp`, { email });
+      await axios.post(`${API_BASE}/auth/request-otp`, { email });
       return { email, message: "OTP sent successfully" };
     } catch (err: unknown) {
       const error = err as AxiosError<KnownError>;

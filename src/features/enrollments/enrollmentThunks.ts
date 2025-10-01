@@ -12,11 +12,11 @@ export const fetchUserEnrollments = createAsyncThunk<Enrollment[], void, { rejec
   'enrollments/fetchByUser',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get('/enrollments'); // Assuming this is the new backend route
+      const response = await api.get('/enrollments');
       return response.data.data;
     } catch (err: unknown) {
       const error = err as AxiosError<KnownError>;
-      return rejectWithValue('Failed to fetch enrollments');
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch enrollments');
     }
   }
 );
@@ -29,7 +29,7 @@ export const enrollInCourse = createAsyncThunk<Enrollment, { courseId: string; b
         return response.data.data;
       } catch (err: unknown) {
         const error = err as AxiosError<KnownError>;
-        return rejectWithValue('Failed to enroll in course');
+        return rejectWithValue(error.response?.data?.message || 'Failed to enroll in course');
       }
     }
   );

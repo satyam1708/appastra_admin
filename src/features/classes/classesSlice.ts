@@ -1,5 +1,5 @@
 // src/features/classes/classesSlice.ts
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 import { Class } from '@/src/types';
 import { fetchClassesBySubject } from './classesThunks';
 
