@@ -9,6 +9,7 @@ const nextConfig = {
         port: '',
         pathname: '/public/**', // ✅ Allows images from the 'public' folder
       },
+      
     ],
   },
 };

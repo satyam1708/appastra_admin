@@ -11,7 +11,7 @@ interface BatchCardProps {
 }
 
 export default function BatchCard({ batch, course }: BatchCardProps) {
-  const courseTypePath = course.isPaid ? "paid-courses" : "free-courses";
+  const courseTypePath = batch.isPaid ? "paid-courses" : "free-courses";
   const discount =
     batch.mrp && batch.price
       ? ((batch.mrp - batch.price) / batch.mrp) * 100

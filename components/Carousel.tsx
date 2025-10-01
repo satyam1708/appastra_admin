@@ -84,7 +84,6 @@ export default function Carousel({ courses }: { courses: Course[] }) {
             <Image
               src={
                 item.batch.imageUrl ||
-                item.course.imageUrl ||
                 `/images/img${(i % 5) + 1}.png`
               }
               alt={item.batch.name}

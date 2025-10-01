@@ -10,6 +10,7 @@ export interface User {
 }
 
 export interface Batch {
+  description: string | undefined;
   id: string;
   name: string;
   startDate: string;

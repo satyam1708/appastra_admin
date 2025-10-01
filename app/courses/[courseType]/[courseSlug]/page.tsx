@@ -45,7 +45,7 @@ export default function CourseDetailPage({ params }: PageProps) {
     }
 
     if (currentCourse) {
-      if (currentCourse.isPaid) {
+      if (batch.isPaid) {
         setSelectedBatch(batch); // Set the selected batch
         setPurchaseModalOpen(true); // Then open the modal
       } else {
@@ -153,7 +153,7 @@ export default function CourseDetailPage({ params }: PageProps) {
             <div className="sticky top-24">
               <div className="relative w-full h-52 rounded-lg shadow-lg overflow-hidden mb-6">
                 <Image
-                  src={currentCourse.imageUrl || "/images/img1.png"}
+                  src={mainEnrollBatch?.imageUrl || currentCourse.imageUrl || "/images/img1.png"}
                   alt={currentCourse.name}
                   fill
                   className="object-cover"
@@ -161,14 +161,14 @@ export default function CourseDetailPage({ params }: PageProps) {
               </div>
               <div className="bg-white p-6 rounded-lg shadow-md">
                 <h2 className="text-3xl font-bold text-blue-600 mb-4">
-                  {currentCourse.isPaid ? `₹${currentCourse.price}` : "Free"}
+                  {mainEnrollBatch?.isPaid ? `₹${mainEnrollBatch.price}` : "Free"}
                 </h2>
                 <button
                   onClick={() => mainEnrollBatch && handleEnrollClick(mainEnrollBatch)}
                   disabled={!mainEnrollBatch}
                   className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {currentCourse.isPaid ? 'Buy Now' : 'Enroll for Free'}
+                  {mainEnrollBatch?.isPaid ? 'Buy Now' : 'Enroll for Free'}
                 </button>
                 {!hasBatches && <p className="text-xs text-center text-red-500 mt-2">No batches available for enrollment.</p>}
               </div>
