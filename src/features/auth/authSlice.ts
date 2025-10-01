@@ -72,10 +72,12 @@ const authSlice = createSlice({
       .addCase(verifyOtp.fulfilled, (state, action) => {
         if (action.payload.status === 'existing') {
           state.isAuthenticated = true;
-          state.token = action.payload.token;
+          state.token = action.payload.token ?? null;
           state.user = action.payload.user;
           state.isAuthModalOpen = false;
-          localStorage.setItem('token', action.payload.token);
+          if (action.payload.token) {
+            localStorage.setItem('token', action.payload.token);
+          }
         } else {
           state.emailForOtp = action.payload.email; // Carry email over to register
           state.authStep = 'register';
