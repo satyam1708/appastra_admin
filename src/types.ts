@@ -86,7 +86,7 @@ export interface PaymentOrder {
   offer_id: string | null;
   status: string;
   attempts: number;
-  notes: any[];
+  notes: Record<string, string | number | boolean>[];
   created_at: number;
 }
 
@@ -140,7 +140,7 @@ export interface Test {
 export interface TestQuestion {
   id: string;
   text: string;
-  options: any; // JSON field
+  options: Record<string, string>; // JSON field
   marks: number;
 }
 
@@ -155,14 +155,14 @@ export interface Quiz {
 export interface QuizQuestion {
   id: string;
   text: string;
-  options: any; // JSON field
+  options: Record<string, string>; // JSON field
   explanation?: string;
 }
 
 export interface TestAttempt {
   id: string;
   score: number;
-  responses: any; // JSON
+  responses: Record<string, string | number | boolean>; // JSON
   userId: string;
   testId: string;
 }
@@ -170,7 +170,7 @@ export interface TestAttempt {
 export interface QuizAttempt {
   id: string;
   score: number;
-  responses: any; // JSON
+  responses: Record<string, string | number | boolean>; // JSON
   userId: string;
   quizId: string;
 }

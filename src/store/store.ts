@@ -1,6 +1,6 @@
 // src/store/store.ts
 import { configureStore } from "@reduxjs/toolkit";
-import api, { setupInterceptors } from "../lib/api"; // 👈 Import api and setupInterceptors
+import { setupInterceptors } from "../lib/api"; // 👈 Import api and setupInterceptors
 import authReducer from "../features/auth/authSlice";
 import coursesReducer from "../features/courses/coursesSlice";
 import userReducer from "../features/user/userSlice";

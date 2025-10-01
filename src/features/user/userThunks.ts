@@ -2,6 +2,11 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import api from '@/src/lib/api';
 import { User } from '@/src/types';
+import { AxiosError } from 'axios';
+
+interface KnownError {
+  message: string;
+}
 
 export const fetchUserProfile = createAsyncThunk<User, void, { rejectValue: string }>(
   'user/fetchProfile',
@@ -9,8 +14,9 @@ export const fetchUserProfile = createAsyncThunk<User, void, { rejectValue: stri
     try {
       const response = await api.get('/users/profile');
       return response.data.data;
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || 'Failed to fetch profile');
+    } catch (err: unknown) {
+      const error = err as AxiosError<KnownError>;
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch profile');
     }
   }
 );
@@ -21,8 +27,9 @@ export const updateUserProfile = createAsyncThunk<User, Partial<User>, { rejectV
     try {
       const response = await api.put('/users/profile', profileData);
       return response.data.data;
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || 'Failed to update profile');
+    } catch (err: unknown) {
+      const error = err as AxiosError<KnownError>;
+      return rejectWithValue(error.response?.data?.message || 'Failed to update profile');
     }
   }
 );
@@ -33,8 +40,9 @@ export const fetchUserTransactions = createAsyncThunk<any[], void, { rejectValue
     try {
       const response = await api.get('/users/transactions');
       return response.data.data;
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || 'Failed to fetch transactions');
+    } catch (err: unknown) {
+      const error = err as AxiosError<KnownError>;
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch transactions');
     }
   }
 );
@@ -46,7 +54,8 @@ export const changePassword = createAsyncThunk<
 >('user/changePassword', async (passwordData, { rejectWithValue }) => {
   try {
     await api.patch('/users/password', passwordData);
-  } catch (err: any) {
-    return rejectWithValue(err.response?.data?.message || 'Failed to change password');
+  } catch (err: unknown) {
+    const error = err as AxiosError<KnownError>;
+    return rejectWithValue(error.response?.data?.message || 'Failed to change password');
   }
 });

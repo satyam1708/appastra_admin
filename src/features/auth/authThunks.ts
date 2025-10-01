@@ -1,8 +1,19 @@
-// authThunks.ts - CORRECTED
+// src/features/auth/authThunks.ts - CORRECTED
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5050/api";
+
+interface AuthResponse {
+  token?: string;
+  user?: any;
+  email?: string;
+  status?: string;
+}
+
+interface KnownError {
+  message: string;
+}
 
 export const requestOtp = createAsyncThunk(
   "auth/requestOtp",
@@ -10,21 +21,22 @@ export const requestOtp = createAsyncThunk(
     try {
       const res = await axios.post(`${API_BASE}/auth/request-otp`, { email });
       return { email, message: "OTP sent successfully" };
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || "Failed to send OTP");
+    } catch (err: unknown) {
+      const error = err as AxiosError<KnownError>;
+      return rejectWithValue(error.response?.data?.message || "Failed to send OTP");
     }
   }
 );
 
-export const verifyOtp = createAsyncThunk(
+export const verifyOtp = createAsyncThunk<AuthResponse, { email: string; otp: string }, { rejectValue: string }>(
   "auth/verifyOtp",
-  async ({ email, otp }: { email: string; otp: string }, { rejectWithValue }) => {
+  async ({ email, otp }, { rejectWithValue }) => {
     try {
       const res = await axios.post(`${API_BASE}/auth/verify-otp`, { email, otp });
-      // 🟢 FIX: Return the entire data payload so the frontend can check for 'token' or 'email'
       return res.data.data;
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || "OTP verification failed");
+    } catch (err: unknown) {
+      const error = err as AxiosError<KnownError>;
+      return rejectWithValue(error.response?.data?.message || "OTP verification failed");
     }
   }
 );
@@ -34,10 +46,10 @@ export const registerUser = createAsyncThunk(
   async (userData: { email: string; name: string; phone: string; password: string }, { rejectWithValue }) => {
     try {
       const res = await axios.post(`${API_BASE}/auth/register`, userData);
-      // 🟢 Register also returns { token, user } in its data field
       return res.data.data;
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || "Registration failed");
+    } catch (err: unknown) {
+        const error = err as AxiosError<KnownError>;
+      return rejectWithValue(error.response?.data?.message || "Registration failed");
     }
   }
 );

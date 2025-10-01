@@ -1,4 +1,5 @@
 // src/lib/api.ts
+import { EnhancedStore } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const api = axios.create({
@@ -10,7 +11,7 @@ const api = axios.create({
 
 // Interceptor to add the auth token to every request
 // We will move this logic into a setup function
-export const setupInterceptors = (store: any) => {
+export const setupInterceptors = (store: EnhancedStore) => {
   api.interceptors.request.use((config) => {
     const token = store.getState().auth.token;
     if (token) {
