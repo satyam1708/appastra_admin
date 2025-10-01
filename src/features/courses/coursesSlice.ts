@@ -1,13 +1,7 @@
 // src/features/courses/coursesSlice.ts
 import { createSlice } from "@reduxjs/toolkit";
 import { fetchCourseBySlug, fetchCourses } from "./coursesThunks";
-
-interface Course {
-  id: string;
-  name: string;
-  medium: string;
-  duration: string;
-}
+import { Course } from "@/src/types"; // ✅ IMPORT the correct Course type
 
 interface CoursesState {
   courses: Course[];
