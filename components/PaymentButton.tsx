@@ -8,6 +8,14 @@ import { createPaymentOrder } from '@/src/features/payment/paymentThunks';
 import useRazorpay from '@/src/hooks/useRazorpay';
 import { fetchUserEnrollments } from '@/src/features/enrollments/enrollmentThunks';
 
+// Extend the Window interface to include Razorpay
+interface CustomWindow extends Window {
+    Razorpay: any;
+}
+
+declare const window: CustomWindow;
+
+
 interface PaymentButtonProps {
   courseId: string;
   amount: number; // Final amount in paise
@@ -69,7 +77,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({ courseId, amount, couponC
         },
       };
 
-      const rzp = new (window as any).Razorpay(options);
+      const rzp = new window.Razorpay(options);
       rzp.open();
 
       rzp.on('payment.failed', function (response: RazorpayErrorResponse) {
