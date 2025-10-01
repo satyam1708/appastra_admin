@@ -62,7 +62,7 @@ declare const window: CustomWindow;
 
 
 interface PaymentButtonProps {
-  batchId: string; // Changed from courseId
+  batchId: string;
   amount: number; // Final amount in paise
   couponCode?: string;
   onSuccess: () => void; // A function to close the modal
@@ -80,7 +80,6 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({ batchId, amount, couponCo
       return;
     }
 
-    // Dispatch with batchId
     const result = await dispatch(createPaymentOrder({ batchId, couponCode }));
 
     if (createPaymentOrder.fulfilled.match(result)) {
@@ -115,7 +114,6 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({ batchId, amount, couponCo
         alert(`Payment failed: ${response.error.description}`);
       });
     } else {
-      // @ts-expect-error - result.payload can be a string for a rejected thunk
       alert(`Error: ${result.payload || 'Could not create payment order.'}`);
     }
   };
