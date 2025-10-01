@@ -1,6 +1,6 @@
 // src/features/payment/paymentSlice.ts
 import { createSlice } from '@reduxjs/toolkit';
-import { PaymentOrder } from '@/src/types';
+import { PaymentOrder, Coupon } from '@/src/types';
 import { createPaymentOrder, validateCoupon } from './paymentThunks';
 
 

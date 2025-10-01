@@ -1,7 +1,7 @@
 // app/courses/[courseType]/page.tsx
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, use } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/src/store/store";
 import { fetchCourses } from "@/src/features/courses/coursesThunks";
@@ -10,10 +10,11 @@ import BatchCard from "@/components/BatchCard";
 import { Course, Batch } from "@/src/types";
 
 interface PageProps {
-  params: { courseType: 'paid-courses' | 'free-courses' };
+  params: Promise<{ courseType: 'paid-courses' | 'free-courses' }>;
 }
 
 export default function CoursesPage({ params }: PageProps) {
+  const { courseType } = use(params);
   const dispatch = useDispatch<AppDispatch>();
   const { courses, loading, error } = useSelector(
     (state: RootState) => state.courses
@@ -26,7 +27,7 @@ export default function CoursesPage({ params }: PageProps) {
     }
   }, [dispatch, courses.length]);
 
-  const isPaidPage = params.courseType === 'paid-courses';
+  const isPaidPage = courseType === 'paid-courses';
 
   const renderContent = () => {
     if (loading) return <p>Loading...</p>;

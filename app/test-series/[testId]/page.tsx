@@ -5,18 +5,19 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/src/store/store";
 import { fetchTestDetails } from "@/src/features/tests/testThunks";
-import { Test } from "@/src/types";
+import { Test, TestQuestion } from "@/src/types";
 import Link from "next/link";
 
 interface PageProps {
   params: { testId: string };
 }
 
-const TestCard = ({ test }: { test: Test }) => (
+const TestQuestionCard = ({ question }: { question: TestQuestion }) => (
     <div className="bg-white rounded-lg shadow-md p-4 flex justify-between items-center">
-      <h3 className="text-lg font-semibold">{test.title}</h3>
-      <Link href={`/test/${test.id}`} className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">
-          Start Test
+      <h3 className="text-lg font-semibold">{question.text}</h3>
+      {/* Link might need to be adjusted based on your routing for individual questions */}
+      <Link href={`/test/question/${question.id}`} className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">
+          Start Question
       </Link>
     </div>
   );
@@ -37,9 +38,8 @@ export default function TestSeriesDetailPage({ params }: PageProps) {
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6">{currentTest.title}</h1>
       <div className="space-y-4">
-        {currentTest.questionsList.map((test) => (
-          // @ts-expect-error - The API returns a list of tests, but the type is for a single test.
-          <TestCard key={test.id} test={test} />
+        {currentTest.questionsList.map((question) => (
+          <TestQuestionCard key={question.id} question={question} />
         ))}
       </div>
     </div>

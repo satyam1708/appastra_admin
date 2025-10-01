@@ -1,7 +1,7 @@
 // app/courses/[courseType]/[courseSlug]/page.tsx
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/src/store/store";
 import { fetchCourseBySlug } from "@/src/features/courses/coursesThunks";
@@ -13,13 +13,13 @@ import PurchaseModal from "@/components/PurchaseModal";
 import { openAuthModal } from "@/src/features/auth/authSlice";
 
 interface PageProps {
-  params: Promise<{ courseSlug: string }>;
+  params: { courseSlug: string };
 }
 
 type Tab = "description" | "classes" | "notes" | "tests" | "batches";
 
 export default function CourseDetailPage({ params }: PageProps) {
-  const { courseSlug } = use(params);
+  const { courseSlug } = params;
   const dispatch = useDispatch<AppDispatch>();
   const { currentCourse, loading, error } = useSelector(
     (state: RootState) => state.courses
