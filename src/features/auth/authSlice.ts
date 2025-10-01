@@ -73,22 +73,24 @@ const authSlice = createSlice({
         if (action.payload.status === 'existing') {
           state.isAuthenticated = true;
           state.token = action.payload.token ?? null;
-          state.user = action.payload.user;
+          state.user = action.payload.user ?? null; // ✅ FIXED
           state.isAuthModalOpen = false;
           if (action.payload.token) {
             localStorage.setItem('token', action.payload.token);
           }
         } else {
-          state.emailForOtp = action.payload.email; // Carry email over to register
+          state.emailForOtp = action.payload.email ?? '';
           state.authStep = 'register';
         }
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.isAuthenticated = true;
-        state.token = action.payload.token;
-        state.user = action.payload.user;
+        state.token = action.payload.token ?? null;
+        state.user = action.payload.user ?? null; // ✅ FIXED
         state.isAuthModalOpen = false;
-        localStorage.setItem('token', action.payload.token);
+        if (action.payload.token) {
+            localStorage.setItem('token', action.payload.token);
+        }
       });
   },
 });
