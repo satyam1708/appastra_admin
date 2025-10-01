@@ -14,8 +14,10 @@ export interface Batch {
   name: string;
   startDate: string;
   endDate?: string;
-  isPaid: boolean; // Added
-  price?: number; // Added
+  isPaid: boolean;
+  price?: number;
+  mrp?: number;
+  imageUrl?: string;
 }
 
 export interface Course {
@@ -63,7 +65,7 @@ export interface Enrollment {
   userId: string;
   courseId: string;
   batchId?: string;
-  course: Course; 
+  course: Course;
   batch?: Batch;
 }
 

@@ -6,9 +6,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../src/store/store";
 import { fetchCourses } from "../src/features/courses/coursesThunks";
 import Carousel from "../components/Carousel";
-import FeaturedCourses from "../components/FeaturedCourses";
+import FeaturedBatches from "../components/FeaturedBatches";
 import AboutSection from "../components/AboutSection";
-import { Course } from "@/src/types";
 
 export default function Home() {
   const dispatch = useDispatch<AppDispatch>();
@@ -32,11 +31,11 @@ export default function Home() {
         <p className="text-center p-10">Loading Courses...</p>
       )}
       {error && <p className="text-center p-10 text-red-500">{error}</p>}
-      
+
       {/* Pass the fetched courses as props */}
       <Carousel courses={carouselCourses} />
-      <FeaturedCourses courses={courses} />
-      
+      <FeaturedBatches courses={courses} />
+
       <AboutSection />
     </div>
   );
