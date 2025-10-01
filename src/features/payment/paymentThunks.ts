@@ -1,13 +1,15 @@
 // src/features/payment/paymentThunks.ts
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import api from "@/src/lib/api";
-import { PaymentOrder } from "@/src/types";
-import { Coupon } from "@/src/types";
+import { PaymentOrder, Coupon } from "@/src/types";
 import { AxiosError } from "axios";
 
+// ✅ FIXED: Add batchId to the payload
 interface OrderPayload {
   courseId?: string;
   testSeriesId?: string;
+  batchId?: string; 
+  couponCode?: string;
 }
 
 interface KnownError {

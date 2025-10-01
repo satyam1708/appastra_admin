@@ -1,17 +1,18 @@
-// app/quiz/[quizId]/page.tsx
+// app/free-quiz/[quizId]/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/src/store/store";
 import { fetchQuizzes } from "@/src/features/materials/materialsThunks";
 import { Quiz, QuizQuestion } from "@/src/types";
 
 interface PageProps {
-  params: { quizId: string };
+  params: Promise<{ quizId: string }>;
 }
 
 export default function QuizPage({ params }: PageProps) {
+  const { quizId } = use(params);
   const dispatch = useDispatch<AppDispatch>();
   const { quizzes, loading, error } = useSelector((state: RootState) => state.materials);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -21,7 +22,7 @@ export default function QuizPage({ params }: PageProps) {
     dispatch(fetchQuizzes());
   }, [dispatch]);
 
-  const quiz = quizzes.find((q: Quiz) => q.id === params.quizId);
+  const quiz = quizzes.find((q: Quiz) => q.id === quizId);
   const currentQuestion = quiz?.quizquestions[currentQuestionIndex];
 
   const handleAnswer = (questionId: string, answer: string) => {
