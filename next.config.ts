@@ -5,9 +5,9 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'example.com',
+        hostname: 'tridentastrafiles.s3.us-east-1.amazonaws.com', // ✅ Correct hostname added
         port: '',
-        pathname: '/images/**',
+        pathname: '/public/**', // ✅ Allows images from the 'public' folder
       },
     ],
   },
