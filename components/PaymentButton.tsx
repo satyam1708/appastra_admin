@@ -1,3 +1,4 @@
+// components/PaymentButton.tsx
 "use client";
 
 import React from 'react';
@@ -61,13 +62,13 @@ declare const window: CustomWindow;
 
 
 interface PaymentButtonProps {
-  courseId: string;
+  batchId: string; // Changed from courseId
   amount: number; // Final amount in paise
   couponCode?: string;
   onSuccess: () => void; // A function to close the modal
 }
 
-const PaymentButton: React.FC<PaymentButtonProps> = ({ courseId, amount, couponCode, onSuccess }) => {
+const PaymentButton: React.FC<PaymentButtonProps> = ({ batchId, amount, couponCode, onSuccess }) => {
   const dispatch = useDispatch<AppDispatch>();
   const razorpayLoaded = useRazorpay();
   const { profile } = useSelector((state: RootState) => state.user);
@@ -79,7 +80,8 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({ courseId, amount, couponC
       return;
     }
 
-    const result = await dispatch(createPaymentOrder({ courseId, couponCode }));
+    // Dispatch with batchId
+    const result = await dispatch(createPaymentOrder({ batchId, couponCode }));
 
     if (createPaymentOrder.fulfilled.match(result)) {
       const order = result.payload;

@@ -8,7 +8,7 @@ import { fetchCourseBySlug } from "@/src/features/courses/coursesThunks";
 import { enrollInCourse } from "@/src/features/enrollments/enrollmentThunks";
 import Image from "next/image";
 import { Video, BookOpen, Layers } from "lucide-react";
-import { Course, Subject, Class, Resource, Quiz, Batch } from "@/src/types";
+import { Course, Batch } from "@/src/types";
 import PurchaseModal from "@/components/PurchaseModal";
 import { openAuthModal } from "@/src/features/auth/authSlice";
 
@@ -25,8 +25,12 @@ export default function CourseDetailPage({ params }: PageProps) {
     (state: RootState) => state.courses
   );
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  
+  // State for the purchase flow
   const [isPurchaseModalOpen, setPurchaseModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<Tab>("batches"); // Default to batches tab
+  const [selectedBatch, setSelectedBatch] = useState<Batch | null>(null);
+
+  const [activeTab, setActiveTab] = useState<Tab>("batches");
 
   useEffect(() => {
     if (courseSlug) {
@@ -34,7 +38,7 @@ export default function CourseDetailPage({ params }: PageProps) {
     }
   }, [dispatch, courseSlug]);
   
-  const handleEnrollClick = (batchId?: string) => {
+  const handleEnrollClick = (batch: Batch) => {
     if (!isAuthenticated) {
       dispatch(openAuthModal());
       return;
@@ -42,16 +46,22 @@ export default function CourseDetailPage({ params }: PageProps) {
 
     if (currentCourse) {
       if (currentCourse.isPaid) {
-        setPurchaseModalOpen(true);
+        setSelectedBatch(batch); // Set the selected batch
+        setPurchaseModalOpen(true); // Then open the modal
       } else {
-        // For free courses, enroll directly
-        dispatch(enrollInCourse({ courseId: currentCourse.id, batchId }))
+        dispatch(enrollInCourse({ courseId: currentCourse.id, batchId: batch.id }))
           .unwrap()
           .then(() => alert("Successfully enrolled!"))
           .catch((err) => alert(`Enrollment failed: ${err}`));
       }
     }
   };
+  
+  // Close the modal and clear the selected batch
+  const handleCloseModal = () => {
+    setPurchaseModalOpen(false);
+    setSelectedBatch(null);
+  }
 
   const TabButton = ({
     tabName,
@@ -87,7 +97,7 @@ export default function CourseDetailPage({ params }: PageProps) {
                                 <p className="text-sm text-gray-600">Starts: {new Date(batch.startDate).toLocaleDateString()}</p>
                             </div>
                             <button
-                                onClick={() => handleEnrollClick(batch.id)}
+                                onClick={() => handleEnrollClick(batch)}
                                 className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
                             >
                                 Enroll Now
@@ -101,12 +111,7 @@ export default function CourseDetailPage({ params }: PageProps) {
             );
         case "description":
             return <p className="text-gray-700 leading-relaxed">{currentCourse?.description}</p>;
-        case "classes":
-            // Content for classes tab...
-        case "notes":
-            // Content for notes tab...
-        case "tests":
-            // Content for tests tab...
+        // ... other cases
         default:
             return null;
     }
@@ -115,13 +120,17 @@ export default function CourseDetailPage({ params }: PageProps) {
   if (loading) return <div className="text-center p-10">Loading Course...</div>;
   if (error) return <p className="text-center p-10 text-red-500">Error: {error}</p>;
   if (!currentCourse) return <div className="text-center p-10">Course not found.</div>;
+  
+  const hasBatches = currentCourse.batches && currentCourse.batches.length > 0;
+  const mainEnrollBatch = hasBatches ? currentCourse.batches[0] : null;
 
   return (
     <>
-      {isPurchaseModalOpen && (
+      {isPurchaseModalOpen && selectedBatch && currentCourse && (
         <PurchaseModal
           course={currentCourse}
-          onClose={() => setPurchaseModalOpen(false)}
+          batch={selectedBatch}
+          onClose={handleCloseModal}
         />
       )}
 
@@ -155,11 +164,13 @@ export default function CourseDetailPage({ params }: PageProps) {
                   {currentCourse.isPaid ? `₹${currentCourse.price}` : "Free"}
                 </h2>
                 <button
-                  onClick={() => handleEnrollClick()} // General enroll for the whole course
-                  className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition"
+                  onClick={() => mainEnrollBatch && handleEnrollClick(mainEnrollBatch)}
+                  disabled={!mainEnrollBatch}
+                  className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {currentCourse.isPaid ? 'Buy Course' : 'Enroll for Free'}
+                  {currentCourse.isPaid ? 'Buy Now' : 'Enroll for Free'}
                 </button>
+                {!hasBatches && <p className="text-xs text-center text-red-500 mt-2">No batches available for enrollment.</p>}
               </div>
             </div>
           </div>

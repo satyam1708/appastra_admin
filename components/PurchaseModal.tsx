@@ -6,21 +6,23 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/src/store/store';
 import { validateCoupon } from '@/src/features/payment/paymentThunks';
 import { clearCoupon } from '@/src/features/payment/paymentSlice';
-import { Course } from '@/src/types';
+import { Course, Batch } from '@/src/types';
 import PaymentButton from './PaymentButton';
 
 interface PurchaseModalProps {
   course: Course;
+  batch: Batch; // Expect the selected batch
   onClose: () => void;
 }
 
-export default function PurchaseModal({ course, onClose }: PurchaseModalProps) {
+export default function PurchaseModal({ course, batch, onClose }: PurchaseModalProps) {
   const dispatch = useDispatch<AppDispatch>();
   const { coupon, discount, loading, error } = useSelector((state: RootState) => state.payment);
   const [couponCode, setCouponCode] = useState('');
 
-  const GST_RATE = 0.18; // 18% GST
+  // Use the course price as the base price
   const basePrice = course.price || 0;
+  const GST_RATE = 0.18; // 18% GST
   const priceAfterDiscount = basePrice - discount;
   const gstAmount = priceAfterDiscount * GST_RATE;
   const totalPrice = priceAfterDiscount + gstAmount;
@@ -34,7 +36,8 @@ export default function PurchaseModal({ course, onClose }: PurchaseModalProps) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4 text-sky-900">{course.name}</h2>
+        <h2 className="text-2xl font-bold mb-2 text-sky-900">{course.name}</h2>
+        <p className="text-md text-gray-600 mb-4">Batch: {batch.name}</p>
 
         {/* Coupon Section */}
         <div className="flex gap-2 mb-6">
@@ -80,7 +83,7 @@ export default function PurchaseModal({ course, onClose }: PurchaseModalProps) {
         <div className="space-y-3">
           <PaymentButton
             amount={totalPrice * 100} // Amount in paise
-            courseId={course.id}
+            batchId={batch.id} // Pass the batchId instead of courseId
             couponCode={coupon?.code} // Pass the validated coupon code
             onSuccess={onClose} // Pass onClose to the button
           />
