@@ -3,11 +3,11 @@
 
 import { useEffect, use } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/src/store/store";
-import { fetchCourses } from "@/src/features/courses/coursesThunks";
-import CourseCard from "@/components/CourseCard";
-import BatchCard from "@/components/BatchCard";
-import { Course, Batch } from "@/src/types";
+import { AppDispatch, RootState } from "../../../src/store/store";
+import { fetchCourses } from "../../../src/features/courses/coursesThunks";
+import CourseCard from "../../../components/CourseCard";
+import BatchCard from "../../../components/BatchCard";
+import { Course, Batch } from "../../../src/types";
 
 interface PageProps {
   params: Promise<{ courseType: 'paid-courses' | 'free-courses' }>;
@@ -30,13 +30,14 @@ export default function CoursesPage({ params }: PageProps) {
   const isPaidPage = courseType === 'paid-courses';
 
   const renderContent = () => {
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p className="text-red-500">{error}</p>;
+    if (loading) return <p className="text-center p-10">Loading...</p>;
+    if (error) return <p className="text-center p-10 text-red-500">{error}</p>;
 
+    // If a course goal is selected, show batches from that course
     if (selectedCourse) {
       const batchesToShow = selectedCourse.batches.filter(batch => {
-        // This assumes free courses have no price and paid courses have a price > 0
-        return isPaidPage ? (selectedCourse.price ?? 0) > 0 : (selectedCourse.price ?? 0) === 0;
+        // Filter batches based on the page type (paid/free)
+        return isPaidPage ? batch.isPaid : !batch.isPaid;
       });
 
       return (
@@ -47,11 +48,17 @@ export default function CoursesPage({ params }: PageProps) {
         </div>
       );
     } else {
-      const filteredCourses = courses.filter(course => course.isPaid === isPaidPage);
+      // If no course goal is selected, show all relevant batches from all courses
+      const allBatches = courses.flatMap(course => 
+        course.batches.map(batch => ({ ...batch, course })) // Attach course info to each batch
+      );
+
+      const filteredBatches = allBatches.filter(batch => isPaidPage ? batch.isPaid : !batch.isPaid);
+
       return (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredCourses.map((course: Course) => (
-            <CourseCard key={course.id} course={course} />
+          {filteredBatches.map((batch) => (
+            <BatchCard key={batch.id} batch={batch} course={batch.course} />
           ))}
         </div>
       );
@@ -60,12 +67,13 @@ export default function CoursesPage({ params }: PageProps) {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">
+      <h1 className="text-3xl font-bold mb-6 text-sky-900">
         {selectedCourse
           ? `${isPaidPage ? "Paid" : "Free"} Batches for ${selectedCourse.name}`
-          : isPaidPage ? "Paid Courses" : "Free Courses"}
+          : isPaidPage ? "All Paid Batches" : "All Free Batches"}
       </h1>
       {renderContent()}
     </div>
   );
 }
+

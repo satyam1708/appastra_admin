@@ -22,7 +22,7 @@ export default function BatchCard({ batch, course }: BatchCardProps) {
       <Link href={`/courses/${courseTypePath}/${course.slug}`}>
         <div className="relative h-48 w-full overflow-hidden rounded-t-2xl">
           <Image
-            src={batch.imageUrl || course.imageUrl || "/images/img1.png"}
+            src={batch.imageUrl ||  "/images/img1.png"}
             alt={batch.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"
