@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/src/store/store";
 import { requestOtp, verifyOtp, registerUser } from "@/src/features/auth/authThunks";
-import { closeAuthModal, setAuthStep } from "@/src/features/auth/authSlice";
+import { closeAuthModal } from "@/src/features/auth/authSlice";
 
 export default function AuthModal() {
   const dispatch = useDispatch<AppDispatch>();

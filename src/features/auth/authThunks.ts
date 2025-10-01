@@ -1,12 +1,13 @@
 // src/features/auth/authThunks.ts
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios, { AxiosError } from "axios";
+import { User } from "@/src/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5050/api";
 
 interface AuthResponse {
   token?: string;
-  user?: any;
+  user?: User;
   email?: string;
   status?: string;
 }

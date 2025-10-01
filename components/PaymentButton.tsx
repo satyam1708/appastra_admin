@@ -1,4 +1,4 @@
-// components/PaymentButton.tsx - UPDATED
+// components/PaymentButton.tsx
 "use client";
 
 import React from 'react';
@@ -13,6 +13,24 @@ interface PaymentButtonProps {
   amount: number; // Final amount in paise
   couponCode?: string;
   onSuccess: () => void; // A function to close the modal
+}
+
+interface RazorpayResponse {
+    razorpay_payment_id: string;
+    razorpay_order_id: string;
+    razorpay_signature: string;
+}
+
+interface RazorpayError {
+    code: number;
+    description: string;
+    source: string;
+    step: string;
+    reason: string;
+    metadata: {
+        order_id: string;
+        payment_id: string;
+    }
 }
 
 const PaymentButton: React.FC<PaymentButtonProps> = ({ courseId, amount, couponCode, onSuccess }) => {
@@ -41,7 +59,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({ courseId, amount, couponC
         name: "AppAstra",
         description: "Course Payment",
         order_id: order.id, // Use order_id from your backend
-        handler: function (response: any) {
+        handler: function (response: RazorpayResponse) {
           // Payment is successful, backend webhook will handle enrollment
           alert("Payment successful! You are now enrolled.");
           dispatch(fetchUserEnrollments()); // Refresh user enrollments
@@ -60,11 +78,11 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({ courseId, amount, couponC
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
 
-      rzp.on('payment.failed', function (response: any) {
+      rzp.on('payment.failed', function (response: RazorpayError) {
         alert(`Payment failed: ${response.error.description}`);
       });
     } else {
-        // @ts-ignore
+        // @ts-expect-error - payload can be a string or an object
       alert(`Error: ${result.payload || 'Could not create payment order.'}`);
     }
   };
