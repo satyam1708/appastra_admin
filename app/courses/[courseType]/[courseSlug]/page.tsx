@@ -30,7 +30,7 @@ export default function CourseDetailPage({ params }: PageProps) {
 
   useEffect(() => {
     if (courseSlug) {
-      dispatch(fetchCourseBySlug(courseSlug));
+      dispatch(fetchCourseBySlug(courseSlug as string));
     }
   }, [dispatch, courseSlug]);
   

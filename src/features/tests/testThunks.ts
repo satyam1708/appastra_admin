@@ -29,7 +29,7 @@ export const fetchTestDetails = createAsyncThunk<Test, string, { rejectValue: st
         return response.data.data;
       } catch (err: unknown) {
         const error = err as AxiosError<KnownError>;
-        return rejectWithValue(err.response?.data?.message || 'Failed to fetch test details');
+        return rejectWithValue(error.response?.data?.message || 'Failed to fetch test details');
       }
     }
 );
