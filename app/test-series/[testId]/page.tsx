@@ -1,14 +1,16 @@
 // app/test-series/[testId]/page.tsx
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, use } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/src/store/store";
 import { fetchTestDetails } from "@/src/features/tests/testThunks";
 import { Test, TestQuestion } from "@/src/types";
 import Link from "next/link";
 
-// The PageProps interface has been removed
+interface PageProps {
+  params: Promise<{ testId: string }>;
+}
 
 const TestQuestionCard = ({ question }: { question: TestQuestion }) => (
     <div className="bg-white rounded-lg shadow-md p-4 flex justify-between items-center">
@@ -20,14 +22,14 @@ const TestQuestionCard = ({ question }: { question: TestQuestion }) => (
     </div>
   );
 
-// The props are now typed inline in the function signature
-export default function TestSeriesDetailPage({ params }: { params: { testId: string } }) {
+export default function TestSeriesDetailPage({ params }: PageProps) {
+  const { testId } = use(params); // ✅ FIXED: Unwrap params with use()
   const dispatch = useDispatch<AppDispatch>();
   const { currentTest, loading, error } = useSelector((state: RootState) => state.tests);
 
   useEffect(() => {
-    dispatch(fetchTestDetails(params.testId));
-  }, [dispatch, params.testId]);
+    dispatch(fetchTestDetails(testId));
+  }, [dispatch, testId]);
 
   if (loading) return <p>Loading tests...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
