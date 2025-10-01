@@ -11,6 +11,7 @@ import Link from 'next/link';
 export default function DashboardPage() {
   const dispatch = useDispatch<AppDispatch>();
   const { enrollments, loading, error } = useSelector((state: RootState) => state.enrollments);
+  const { selectedCourse } = useSelector((state: RootState) => state.courseGoal);
 
   useEffect(() => {
     dispatch(fetchUserEnrollments());
@@ -19,22 +20,31 @@ export default function DashboardPage() {
   if (loading) return <p>Loading your dashboard...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
+  const filteredEnrollments = selectedCourse
+    ? enrollments.filter(enrollment => enrollment.courseId === selectedCourse.id)
+    : enrollments;
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6">Your Dashboard</h1>
-      <h2 className="text-2xl font-semibold mb-4">Enrolled Courses</h2>
+      <h2 className="text-2xl font-semibold mb-4">
+        {selectedCourse ? `Batches for ${selectedCourse.name}` : 'All Your Batches'}
+      </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {enrollments.map((enrollment: Enrollment) => (
-          // @ts-ignore
-          <div key={enrollment.id} className="p-4 border rounded-lg bg-white shadow-sm">
-            {/* @ts-ignore */}
-            <h3 className="text-xl font-semibold">{enrollment.course.name}</h3>
-            {/* @ts-ignore */}
-            <Link href={`/courses/paid-courses/${enrollment.courseId}`} className="text-blue-600 hover:underline">
-              Go to course
-            </Link>
-          </div>
+        {filteredEnrollments.map((enrollment: Enrollment) => (
+          (enrollment.batch) && (
+            <div key={enrollment.id} className="p-4 border rounded-lg bg-white shadow-sm">
+              <h3 className="text-xl font-semibold">{enrollment.batch.name}</h3>
+              <p className="text-gray-600 mb-2">{enrollment.course.name}</p>
+              <Link href={`/courses/${enrollment.course.isPaid ? 'paid-courses' : 'free-courses'}/${enrollment.course.slug}`} className="text-blue-600 hover:underline">
+                Go to course
+              </Link>
+            </div>
+          )
         ))}
+        {filteredEnrollments.length === 0 && (
+          <p>No batches found for the selected course.</p>
+        )}
       </div>
     </div>
   );
