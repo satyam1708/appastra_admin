@@ -4,10 +4,10 @@ import { Resource, Quiz } from '@/src/types';
 import { fetchAllMaterials, fetchSyllabus, fetchPreviousPapers, fetchQuizzes } from './materialsThunks';
 
 interface MaterialsState {
-  resources: any;
+  resources: Record<string, Resource[]>;
   syllabus: Resource[];
   previousPapers: Resource[];
-  quizzes: Quiz[]; 
+  quizzes: Quiz[];
   loading: boolean;
   error: string | null;
 }

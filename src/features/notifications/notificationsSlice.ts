@@ -1,5 +1,5 @@
 // src/features/notifications/notificationsSlice.ts
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 import { Notification } from '@/src/types';
 import { fetchNotifications, markNotificationAsRead } from './notificationsThunks';
 
