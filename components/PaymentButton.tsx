@@ -8,9 +8,33 @@ import { createPaymentOrder } from '@/src/features/payment/paymentThunks';
 import useRazorpay from '@/src/hooks/useRazorpay';
 import { fetchUserEnrollments } from '@/src/features/enrollments/enrollmentThunks';
 
+// Define the structure of the Razorpay options
+interface RazorpayOptions {
+  key: string;
+  amount: string;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  handler: () => void;
+  prefill: {
+    name: string;
+    email: string;
+    contact: string;
+  };
+  theme: {
+    color: string;
+  };
+}
+
+// Define the Razorpay constructor interface
+interface RazorpayConstructor {
+  new (options: RazorpayOptions): any;
+}
+
 // Extend the Window interface to include Razorpay
 interface CustomWindow extends Window {
-    Razorpay: any;
+    Razorpay: RazorpayConstructor;
 }
 
 declare const window: CustomWindow;
@@ -55,7 +79,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({ courseId, amount, couponC
     if (createPaymentOrder.fulfilled.match(result)) {
       const order = result.payload;
 
-      const options = {
+      const options: RazorpayOptions = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '',
         amount: order.amount.toString(),
         currency: "INR",
@@ -84,7 +108,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({ courseId, amount, couponC
         alert(`Payment failed: ${response.error.description}`);
       });
     } else {
-      // @ts-expect-error - result.payload can be a string or an object
+      // @ts-expect-error - result.payload can be a string for a rejected thunk
       alert(`Error: ${result.payload || 'Could not create payment order.'}`);
     }
   };
