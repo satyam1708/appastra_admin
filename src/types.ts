@@ -14,6 +14,8 @@ export interface Batch {
   name: string;
   startDate: string;
   endDate?: string;
+  isPaid: boolean; // Added
+  price?: number; // Added
 }
 
 export interface Course {
@@ -56,14 +58,13 @@ export interface Class {
   endTime?: string;
 }
 
-// ✅ CORRECTED: Single, accurate Enrollment definition
 export interface Enrollment {
   id: string;
   userId: string;
   courseId: string;
   batchId?: string;
-  course: Course; // Includes the full Course object
-  batch?: Batch;  // Includes the optional Batch object
+  course: Course; 
+  batch?: Batch;
 }
 
 export interface Notification {
@@ -140,11 +141,10 @@ export interface Test {
 export interface TestQuestion {
   id: string;
   text: string;
-  options: Record<string, string>; // JSON field
+  options: Record<string, string>;
   marks: number;
 }
 
-// ✅ CORRECTED: Single, accurate Quiz & QuizQuestion definition
 export interface Quiz {
   id: string;
   title: string;
@@ -155,14 +155,14 @@ export interface Quiz {
 export interface QuizQuestion {
   id: string;
   text: string;
-  options: Record<string, string>; // JSON field
+  options: Record<string, string>;
   explanation?: string;
 }
 
 export interface TestAttempt {
   id: string;
   score: number;
-  responses: Record<string, string | number | boolean>; // JSON
+  responses: Record<string, string | number | boolean>;
   userId: string;
   testId: string;
 }
@@ -170,7 +170,7 @@ export interface TestAttempt {
 export interface QuizAttempt {
   id: string;
   score: number;
-  responses: Record<string, string | number | boolean>; // JSON
+  responses: Record<string, string | number | boolean>;
   userId: string;
   quizId: string;
 }

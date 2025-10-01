@@ -1,4 +1,4 @@
-// components/PurchaseModal.tsx - UPDATED
+// components/PurchaseModal.tsx
 "use client";
 
 import { useState } from 'react';
@@ -11,7 +11,7 @@ import PaymentButton from './PaymentButton';
 
 interface PurchaseModalProps {
   course: Course;
-  batch: Batch; // Expect the selected batch
+  batch: Batch; 
   onClose: () => void;
 }
 
@@ -20,9 +20,8 @@ export default function PurchaseModal({ course, batch, onClose }: PurchaseModalP
   const { coupon, discount, loading, error } = useSelector((state: RootState) => state.payment);
   const [couponCode, setCouponCode] = useState('');
 
-  // Use the course price as the base price
-  const basePrice = course.price || 0;
   const GST_RATE = 0.18; // 18% GST
+  const basePrice = batch.price || 0; // Use batch price
   const priceAfterDiscount = basePrice - discount;
   const gstAmount = priceAfterDiscount * GST_RATE;
   const totalPrice = priceAfterDiscount + gstAmount;
@@ -83,9 +82,9 @@ export default function PurchaseModal({ course, batch, onClose }: PurchaseModalP
         <div className="space-y-3">
           <PaymentButton
             amount={totalPrice * 100} // Amount in paise
-            batchId={batch.id} // Pass the batchId instead of courseId
-            couponCode={coupon?.code} // Pass the validated coupon code
-            onSuccess={onClose} // Pass onClose to the button
+            batchId={batch.id} 
+            couponCode={coupon?.code}
+            onSuccess={onClose}
           />
           <button
             onClick={() => {

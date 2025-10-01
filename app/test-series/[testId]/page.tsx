@@ -8,9 +8,7 @@ import { fetchTestDetails } from "@/src/features/tests/testThunks";
 import { Test, TestQuestion } from "@/src/types";
 import Link from "next/link";
 
-interface PageProps {
-  params: { testId: string };
-}
+// The PageProps interface has been removed
 
 const TestQuestionCard = ({ question }: { question: TestQuestion }) => (
     <div className="bg-white rounded-lg shadow-md p-4 flex justify-between items-center">
@@ -22,7 +20,8 @@ const TestQuestionCard = ({ question }: { question: TestQuestion }) => (
     </div>
   );
 
-export default function TestSeriesDetailPage({ params }: PageProps) {
+// The props are now typed inline in the function signature
+export default function TestSeriesDetailPage({ params }: { params: { testId: string } }) {
   const dispatch = useDispatch<AppDispatch>();
   const { currentTest, loading, error } = useSelector((state: RootState) => state.tests);
 
