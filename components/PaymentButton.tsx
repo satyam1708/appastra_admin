@@ -1,4 +1,3 @@
-// components/PaymentButton.tsx
 "use client";
 
 import React from 'react';
@@ -27,9 +26,30 @@ interface RazorpayOptions {
   };
 }
 
+// Interface for a failed Razorpay payment
+interface RazorpayErrorResponse {
+    error: {
+        code: number;
+        description: string;
+        source: string;
+        step: string;
+        reason: string;
+        metadata: {
+            order_id: string;
+            payment_id: string;
+        }
+    }
+}
+
+// Define the methods available on the Razorpay instance
+interface RazorpayInstance {
+  open(): void;
+  on(event: 'payment.failed', callback: (response: RazorpayErrorResponse) => void): void;
+}
+
 // Define the Razorpay constructor interface
 interface RazorpayConstructor {
-  new (options: RazorpayOptions): any;
+  new (options: RazorpayOptions): RazorpayInstance;
 }
 
 // Extend the Window interface to include Razorpay
@@ -45,21 +65,6 @@ interface PaymentButtonProps {
   amount: number; // Final amount in paise
   couponCode?: string;
   onSuccess: () => void; // A function to close the modal
-}
-
-// Interface for a failed Razorpay payment
-interface RazorpayErrorResponse {
-    error: {
-        code: number;
-        description: string;
-        source: string;
-        step: string;
-        reason: string;
-        metadata: {
-            order_id: string;
-            payment_id: string;
-        }
-    }
 }
 
 const PaymentButton: React.FC<PaymentButtonProps> = ({ courseId, amount, couponCode, onSuccess }) => {
