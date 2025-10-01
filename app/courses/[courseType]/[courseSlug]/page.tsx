@@ -7,7 +7,7 @@ import { AppDispatch, RootState } from "@/src/store/store";
 import { fetchCourseBySlug } from "@/src/features/courses/coursesThunks";
 import { enrollInCourse } from "@/src/features/enrollments/enrollmentThunks";
 import Image from "next/image";
-import { Video, BookOpen, FileText, HelpCircle, Layers } from "lucide-react";
+import { Video, BookOpen, Layers } from "lucide-react";
 import { Course, Subject, Class, Resource, Quiz, Batch } from "@/src/types";
 import PurchaseModal from "@/components/PurchaseModal";
 import { openAuthModal } from "@/src/features/auth/authSlice";

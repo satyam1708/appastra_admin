@@ -15,13 +15,6 @@ interface PaymentButtonProps {
   onSuccess: () => void; // A function to close the modal
 }
 
-// Interface for a successful Razorpay payment
-interface RazorpaySuccessResponse {
-    razorpay_payment_id: string;
-    razorpay_order_id: string;
-    razorpay_signature: string;
-}
-
 // Interface for a failed Razorpay payment
 interface RazorpayErrorResponse {
     error: {
@@ -61,7 +54,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({ courseId, amount, couponC
         name: "AppAstra",
         description: "Course Payment",
         order_id: order.id,
-        handler: function (response: RazorpaySuccessResponse) {
+        handler: function () {
           alert("Payment successful! You are now enrolled.");
           dispatch(fetchUserEnrollments());
           onSuccess();
@@ -83,7 +76,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({ courseId, amount, couponC
         alert(`Payment failed: ${response.error.description}`);
       });
     } else {
-      // @ts-expect-error
+      // @ts-expect-error - result.payload can be a string or an object
       alert(`Error: ${result.payload || 'Could not create payment order.'}`);
     }
   };
