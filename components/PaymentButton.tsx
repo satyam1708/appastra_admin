@@ -15,21 +15,25 @@ interface PaymentButtonProps {
   onSuccess: () => void; // A function to close the modal
 }
 
-interface RazorpayResponse {
+// Interface for a successful Razorpay payment
+interface RazorpaySuccessResponse {
     razorpay_payment_id: string;
     razorpay_order_id: string;
     razorpay_signature: string;
 }
 
-interface RazorpayError {
-    code: number;
-    description: string;
-    source: string;
-    step: string;
-    reason: string;
-    metadata: {
-        order_id: string;
-        payment_id: string;
+// Interface for a failed Razorpay payment
+interface RazorpayErrorResponse {
+    error: {
+        code: number;
+        description: string;
+        source: string;
+        step: string;
+        reason: string;
+        metadata: {
+            order_id: string;
+            payment_id: string;
+        }
     }
 }
 
@@ -45,25 +49,22 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({ courseId, amount, couponC
       return;
     }
 
-    // 1. Create order on the backend
     const result = await dispatch(createPaymentOrder({ courseId, couponCode }));
 
     if (createPaymentOrder.fulfilled.match(result)) {
       const order = result.payload;
 
-      // 2. Open Razorpay Checkout
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '',
         amount: order.amount.toString(),
         currency: "INR",
         name: "AppAstra",
         description: "Course Payment",
-        order_id: order.id, // Use order_id from your backend
-        handler: function () {
-          // Payment is successful, backend webhook will handle enrollment
+        order_id: order.id,
+        handler: function (response: RazorpaySuccessResponse) {
           alert("Payment successful! You are now enrolled.");
-          dispatch(fetchUserEnrollments()); // Refresh user enrollments
-          onSuccess(); // Close the modal
+          dispatch(fetchUserEnrollments());
+          onSuccess();
         },
         prefill: {
           name: profile?.name || '',
@@ -78,11 +79,11 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({ courseId, amount, couponC
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
 
-      rzp.on('payment.failed', function (response: { error: RazorpayError }) {
+      rzp.on('payment.failed', function (response: RazorpayErrorResponse) {
         alert(`Payment failed: ${response.error.description}`);
       });
     } else {
-        // @ts-expect-error
+      // @ts-expect-error
       alert(`Error: ${result.payload || 'Could not create payment order.'}`);
     }
   };

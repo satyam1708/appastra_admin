@@ -38,7 +38,7 @@ export default function TestSeriesDetailPage({ params }: PageProps) {
       <h1 className="text-3xl font-bold mb-6">{currentTest.title}</h1>
       <div className="space-y-4">
         {currentTest.questionsList.map((test) => (
-          // @ts-expect-error
+          // @ts-expect-error - The API returns a list of tests, but the type is for a single test.
           <TestCard key={test.id} test={test} />
         ))}
       </div>

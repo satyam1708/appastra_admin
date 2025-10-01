@@ -1,18 +1,27 @@
-// app/settings/page.tsx - UPDATED
+// app/settings/page.tsx
 "use client";
 
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/src/store/store';
 import { fetchUserProfile, changePassword } from '@/src/features/user/userThunks';
-import { useForm } from 'react-hook-form';
+import { useForm, FieldValues } from 'react-hook-form';
 import { User as UserIcon, Lock } from 'lucide-react';
+
+type Tab = 'profile' | 'password';
+
+interface TabButtonProps {
+  tabName: Tab;
+  currentTab: Tab;
+  setTab: (tab: Tab) => void;
+  children: React.ReactNode;
+}
 
 export default function SettingsPage() {
   const dispatch = useDispatch<AppDispatch>();
-  const { profile, loading, error } = useSelector((state: RootState) => state.user);
+  const { profile, loading } = useSelector((state: RootState) => state.user);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
-  const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile');
+  const [activeTab, setActiveTab] = useState<Tab>('profile');
 
   const { register: registerPassword, handleSubmit: handlePasswordSubmit, reset: resetPasswordForm } = useForm();
 
@@ -22,7 +31,7 @@ export default function SettingsPage() {
     }
   }, [dispatch, profile]);
 
-  const onPasswordSubmit = (data: any) => {
+  const onPasswordSubmit = (data: FieldValues) => {
     setMessage(null);
     dispatch(changePassword({ oldPassword: data.oldPassword, newPassword: data.newPassword }))
       .unwrap()
@@ -35,7 +44,7 @@ export default function SettingsPage() {
       });
   };
   
-  const TabButton = ({ tabName, currentTab, setTab, children }: any) => (
+  const TabButton = ({ tabName, currentTab, setTab, children }: TabButtonProps) => (
     <button
       onClick={() => setTab(tabName)}
       className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
