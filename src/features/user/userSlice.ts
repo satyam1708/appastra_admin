@@ -5,7 +5,7 @@ import { fetchUserProfile, updateUserProfile, fetchUserTransactions } from './us
 
 interface UserState {
   profile: User | null;
-  transactions: any[];
+  transactions: Record<string, unknown>[];
   loading: boolean;
   error: string | null;
 }

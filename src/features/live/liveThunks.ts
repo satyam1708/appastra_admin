@@ -2,6 +2,11 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import api from '@/src/lib/api';
 import { LiveSession } from '@/src/types';
+import { AxiosError } from 'axios';
+
+interface KnownError {
+  message: string;
+}
 
 export const fetchLiveSessions = createAsyncThunk<LiveSession[], string, { rejectValue: string }>(
   'live/fetchSessions',
@@ -9,8 +14,9 @@ export const fetchLiveSessions = createAsyncThunk<LiveSession[], string, { rejec
     try {
       const response = await api.get(`/live/${classId}/livesessions`);
       return response.data.data;
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || 'Failed to fetch live sessions');
+    } catch (err: unknown) {
+      const error = err as AxiosError<KnownError>;
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch live sessions');
     }
   }
 );

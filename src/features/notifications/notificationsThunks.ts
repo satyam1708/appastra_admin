@@ -2,6 +2,11 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import api from '@/src/lib/api';
 import { Notification } from '@/src/types';
+import { AxiosError } from 'axios';
+
+interface KnownError {
+  message: string;
+}
 
 export const fetchNotifications = createAsyncThunk<Notification[], void, { rejectValue: string }>(
   'notifications/fetchAll',
@@ -9,8 +14,9 @@ export const fetchNotifications = createAsyncThunk<Notification[], void, { rejec
     try {
       const response = await api.get('/notifications');
       return response.data.data.notifications;
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || 'Failed to fetch notifications');
+    } catch (err: unknown) {
+      const error = err as AxiosError<KnownError>;
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch notifications');
     }
   }
 );
@@ -21,8 +27,9 @@ export const markNotificationAsRead = createAsyncThunk<string, string, { rejectV
     try {
       await api.patch(`/notifications/${notificationId}/read`);
       return notificationId;
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || 'Failed to mark as read');
+    } catch (err: unknown) {
+      const error = err as AxiosError<KnownError>;
+      return rejectWithValue(error.response?.data?.message || 'Failed to mark as read');
     }
   }
 );

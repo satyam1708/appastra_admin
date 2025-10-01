@@ -3,10 +3,15 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import api from "@/src/lib/api";
 import { PaymentOrder } from "@/src/types";
 import { Coupon } from "@/src/types";
+import { AxiosError } from "axios";
 
 interface OrderPayload {
   courseId?: string;
   testSeriesId?: string;
+}
+
+interface KnownError {
+  message: string;
 }
 
 export const createPaymentOrder = createAsyncThunk<
@@ -17,9 +22,10 @@ export const createPaymentOrder = createAsyncThunk<
   try {
     const response = await api.post("/payment/create-order", orderData);
     return response.data.data;
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err as AxiosError<KnownError>;
     return rejectWithValue(
-      err.response?.data?.message || "Failed to create order"
+      error.response?.data?.message || "Failed to create order"
     );
   }
 });
@@ -40,9 +46,10 @@ export const validateCoupon = createAsyncThunk<
     }
 
     return { coupon, discount };
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err as AxiosError<KnownError>;
     return rejectWithValue(
-      err.response?.data?.message || "Invalid Coupon Code"
+      error.response?.data?.message || "Invalid Coupon Code"
     );
   }
 });

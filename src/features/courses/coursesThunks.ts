@@ -2,6 +2,11 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import api from "@/src/lib/api"; // 👈 Import your configured api instance
 import { Course } from "@/src/types";
+import { AxiosError } from "axios";
+
+interface KnownError {
+  message: string;
+}
 
 export const fetchCourses = createAsyncThunk(
   "courses/fetchCourses",
@@ -10,8 +15,9 @@ export const fetchCourses = createAsyncThunk(
       // No need to manually get token, the api interceptor handles it
       const res = await api.get("/courses");
       return res.data.data;
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || "Failed to fetch courses");
+    } catch (err: unknown) {
+      const error = err as AxiosError<KnownError>;
+      return rejectWithValue(error.response?.data?.message || "Failed to fetch courses");
     }
   }
 );
@@ -22,8 +28,9 @@ export const fetchCourseBySlug = createAsyncThunk<Course, string, { rejectValue:
     try {
       const response = await api.get(`/courses/slug/${slug}`);
       return response.data.data;
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || 'Failed to fetch course');
+    } catch (err: unknown) {
+      const error = err as AxiosError<KnownError>;
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch course');
     }
   }
 );

@@ -2,6 +2,11 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import api from '@/src/lib/api';
 import { Subject } from '@/src/types';
+import { AxiosError } from 'axios';
+
+interface KnownError {
+  message: string;
+}
 
 export const fetchSubjectsByCourse = createAsyncThunk<Subject[], string, { rejectValue: string }>(
   'subjects/fetchByCourse',
@@ -9,8 +14,9 @@ export const fetchSubjectsByCourse = createAsyncThunk<Subject[], string, { rejec
     try {
       const response = await api.get(`/subjects/course/${courseId}`);
       return response.data.data;
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || 'Failed to fetch subjects');
+    } catch (err: unknown) {
+      const error = err as AxiosError<KnownError>;
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch subjects');
     }
   }
 );

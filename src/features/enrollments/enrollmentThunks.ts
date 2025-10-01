@@ -2,6 +2,11 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import api from '@/src/lib/api';
 import { Enrollment } from '@/src/types';
+import { AxiosError } from 'axios';
+
+interface KnownError {
+  message: string;
+}
 
 export const fetchUserEnrollments = createAsyncThunk<Enrollment[], void, { rejectValue: string }>(
   'enrollments/fetchByUser',
@@ -9,7 +14,8 @@ export const fetchUserEnrollments = createAsyncThunk<Enrollment[], void, { rejec
     try {
       const response = await api.get('/enrollments'); // Assuming this is the new backend route
       return response.data.data;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as AxiosError<KnownError>;
       return rejectWithValue('Failed to fetch enrollments');
     }
   }
@@ -21,7 +27,8 @@ export const enrollInCourse = createAsyncThunk<Enrollment, { courseId: string; b
       try {
         const response = await api.post('/enrollments', enrollmentData);
         return response.data.data;
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const error = err as AxiosError<KnownError>;
         return rejectWithValue('Failed to enroll in course');
       }
     }
