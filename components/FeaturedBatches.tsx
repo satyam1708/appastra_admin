@@ -1,14 +1,34 @@
 // components/FeaturedBatches.tsx
 "use client";
 
-import { useSelector } from "react-redux";
-import { RootState } from "@/src/store/store";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "@/src/store/store";
 import BatchCard from "./BatchCard";
-import { Course, Batch } from "@/src/types";
+import { Course } from "@/src/types";
+import { useEffect, useMemo } from "react";
+import { fetchUserEnrollments } from "@/src/features/enrollments/enrollmentThunks";
 
 export default function FeaturedBatches({ courses }: { courses: Course[] }) {
+  const dispatch = useDispatch<AppDispatch>();
   const { selectedCourse } = useSelector(
     (state: RootState) => state.courseGoal
+  );
+  
+  // 👇 1. Get authentication and enrollment state
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { enrollments } = useSelector((state: RootState) => state.enrollments);
+
+  // 👇 2. Fetch enrollments if the user is logged in
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(fetchUserEnrollments());
+    }
+  }, [dispatch, isAuthenticated]);
+
+  // 👇 3. Create an efficient lookup set for enrolled batch IDs
+  const enrolledBatchIds = useMemo(() => 
+    new Set(enrollments.map(e => e.batchId)),
+    [enrollments]
   );
 
   const batchesToShow = selectedCourse
@@ -31,7 +51,12 @@ export default function FeaturedBatches({ courses }: { courses: Course[] }) {
       </h2>
       <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-8">
         {batchesToShow.map(({ batch, course }) => (
-          <BatchCard key={batch.id} batch={batch} course={course} />
+          <BatchCard 
+            key={batch.id} 
+            batch={batch} 
+            course={course}
+            isEnrolled={enrolledBatchIds.has(batch.id)} // 👈 4. Pass the prop
+          />
         ))}
       </div>
     </section>
