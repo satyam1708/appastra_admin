@@ -8,9 +8,10 @@ import { Batch, Course } from "@/src/types";
 interface BatchCardProps {
   batch: Batch;
   course: Course;
+  isEnrolled: boolean; // 👈 Add the new prop
 }
 
-export default function BatchCard({ batch, course }: BatchCardProps) {
+export default function BatchCard({ batch, course,isEnrolled }: BatchCardProps) {
   const courseTypePath = batch.isPaid ? "paid-courses" : "free-courses";
   const discount =
     batch.mrp && batch.price
@@ -19,6 +20,12 @@ export default function BatchCard({ batch, course }: BatchCardProps) {
 
   return (
     <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer group">
+      {/* 👇 Add a "Purchased" badge if enrolled */}
+      {isEnrolled && (
+        <div className="absolute top-3 right-3 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full z-10">
+          Purchased
+        </div>
+      )}
       <Link href={`/courses/${courseTypePath}/${course.slug}`}>
         <div className="relative h-48 w-full overflow-hidden rounded-t-2xl">
           <Image
@@ -51,8 +58,13 @@ export default function BatchCard({ batch, course }: BatchCardProps) {
               </div>
             )}
           </div>
-          <span className="w-full text-center px-4 py-2 block bg-blue-600 text-white text-sm rounded-full shadow-md hover:bg-blue-700 transition">
-            View Details
+          {/* 👇 Conditionally change the button text and color */}
+          <span className={`w-full text-center px-4 py-2 block text-white text-sm rounded-full shadow-md transition ${
+            isEnrolled 
+              ? 'bg-green-600 hover:bg-green-700' 
+              : 'bg-blue-600 hover:bg-blue-700'
+          }`}>
+            {isEnrolled ? 'Go to Course' : 'View Details'}
           </span>
         </div>
       </Link>
