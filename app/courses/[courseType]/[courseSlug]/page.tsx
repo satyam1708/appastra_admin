@@ -47,16 +47,21 @@ export default function CourseDetailPage({ params }: PageProps) {
     }
   }, [dispatch, courseSlug, isAuthenticated]);
 
-  const isEnrolled = useMemo(() => {
+
+  // ✅ FIXED: Find the specific batch the user is enrolled in for THIS course
+  const enrolledBatch = useMemo(() => {
     if (!currentCourse || !enrollments || enrollments.length === 0) {
-      return false;
+      return null;
     }
-    // Check if any of the user's enrolled batches match any batch in the current course
-    const enrolledBatchIds = enrollments.map((e) => e.batchId);
-    return currentCourse.batches.some((batch) =>
-      enrolledBatchIds.includes(batch.id)
-    );
+    const courseBatchIds = new Set(currentCourse.batches.map(b => b.id));
+    const enrolledCourseBatch = enrollments.find(e => e.batchId && courseBatchIds.has(e.batchId));
+    
+    if (!enrolledCourseBatch) return null;
+
+    return currentCourse.batches.find(b => b.id === enrolledCourseBatch.batchId);
   }, [currentCourse, enrollments]);
+
+  const isEnrolled = !!enrolledBatch;
 
   const handleEnrollClick = (batch: Batch) => {
     if (!isAuthenticated) {
@@ -108,8 +113,8 @@ export default function CourseDetailPage({ params }: PageProps) {
   );
 
   const renderContent = () => {
-    if (isEnrolled && currentCourse) {
-      return <EnrolledCourseView course={currentCourse} />;
+    if (enrolledBatch) {
+      return <EnrolledCourseView batch={enrolledBatch} />;
     }
     switch (activeTab) {
       case "batches":
