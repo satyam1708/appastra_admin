@@ -1,8 +1,9 @@
 // components/EnrolledCourseView.tsx
-import { Course, Subject, Class as ClassType, Batch } from "@/src/types"; // ✅ Import Batch
+import { Batch, Subject, Class as ClassType } from "@/src/types";
 import { BookOpen, Video, FileText } from "lucide-react";
 import Link from "next/link";
 
+// No changes needed for ClassItem, it's already perfect.
 const ClassItem = ({ cls }: { cls: ClassType }) => {
   const isLive = cls.isLive;
   const hasRecording = cls.videoUrl;
@@ -38,11 +39,15 @@ const ClassItem = ({ cls }: { cls: ClassType }) => {
   );
 };
 
-// ✅ MODIFIED: The component now expects the enrolled batch
 export default function EnrolledCourseView({ batch }: { batch: Batch }) {
+  // ✅ Handle both classes within subjects and classes directly on the batch
+  const directClasses = batch.classes?.filter(cls => !cls.subjectId) || [];
+
   return (
     <div id="course-content" className="space-y-6">
       <h2 className="text-2xl font-bold text-sky-800">Batch Content: {batch.name}</h2>
+      
+      {/* Render subjects and their classes */}
       {batch.subjects?.map((subject: Subject) => (
         <div key={subject.id} className="border rounded-lg p-4 bg-gray-50">
           <h3 className="text-xl font-semibold mb-3 flex items-center gap-2">
@@ -53,15 +58,29 @@ export default function EnrolledCourseView({ batch }: { batch: Batch }) {
             {subject.classes?.map((cls: ClassType) => (
               <ClassItem key={cls.id} cls={cls} />
             ))}
-             {subject.resources?.map((res) => (
-              <a href={res.signedUrl} key={res.id} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-600 hover:underline p-3">
-                 <FileText size={16} />
-                 {res.title}
-              </a>
-            ))}
           </div>
         </div>
       ))}
+
+      {/* ✅ Render classes that are directly part of the batch */}
+      {directClasses.length > 0 && (
+        <div className="border rounded-lg p-4 bg-gray-50">
+           <h3 className="text-xl font-semibold mb-3 flex items-center gap-2">
+            <Video size={20} className="text-blue-600" />
+            Additional Classes
+          </h3>
+          <div className="space-y-2 pl-4 border-l-2 border-blue-200">
+            {directClasses.map((cls: ClassType) => (
+              <ClassItem key={cls.id} cls={cls} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Message if no content is found */}
+      {(!batch.subjects || batch.subjects.length === 0) && directClasses.length === 0 && (
+         <p className="text-center text-gray-500 py-8">No subjects or classes have been added to this batch yet.</p>
+      )}
     </div>
   );
 }
