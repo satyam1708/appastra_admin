@@ -1,15 +1,16 @@
 // app/test-series/[testId]/page.tsx
 "use client";
 
-import { useEffect, use } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/src/store/store";
 import { fetchTestDetails } from "@/src/features/tests/testThunks";
-import { Test, TestQuestion } from "@/src/types";
+import { TestQuestion } from "@/src/types";
 import Link from "next/link";
 
+// Define PageProps with a plain object for params
 interface PageProps {
-  params: Promise<{ testId: string }>;
+  params: { testId: string };
 }
 
 const TestQuestionCard = ({ question }: { question: TestQuestion }) => (
@@ -22,8 +23,9 @@ const TestQuestionCard = ({ question }: { question: TestQuestion }) => (
     </div>
   );
 
+// Destructure params directly from the props
 export default function TestSeriesDetailPage({ params }: PageProps) {
-  const { testId } = use(params); // ✅ FIXED: Unwrap params with use()
+  const { testId } = params; // No use() hook needed
   const dispatch = useDispatch<AppDispatch>();
   const { currentTest, loading, error } = useSelector((state: RootState) => state.tests);
 
