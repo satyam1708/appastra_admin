@@ -1,18 +1,19 @@
 // app/class/[classId]/page.tsx
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, use } from "react"; // 👈 Add 'use' to imports
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/src/store/store";
 import { fetchClassesBySubject } from "@/src/features/classes/classesThunks";
 import { fetchLiveSessions } from "@/src/features/live/liveThunks";
 
+// 👇 Define PageProps with a Promise for params
 interface PageProps {
-  params: { classId: string };
+  params: Promise<{ classId: string }>;
 }
 
 export default function ClassPlayerPage({ params }: PageProps) {
-  const { classId } = params;
+  const { classId } = use(params); // 👈 Unwrap params with the use() hook
   const dispatch = useDispatch<AppDispatch>();
   const { classesBySubject, loading: classesLoading } = useSelector((state: RootState) => state.classes);
   const { sessionsByClass, loading: liveLoading } = useSelector((state: RootState) => state.live);
