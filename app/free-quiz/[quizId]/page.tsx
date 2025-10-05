@@ -1,18 +1,20 @@
 // app/free-quiz/[quizId]/page.tsx
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/src/store/store";
 import { fetchQuizzes } from "@/src/features/materials/materialsThunks";
-import { Quiz, QuizQuestion } from "@/src/types";
+import { Quiz } from "@/src/types";
 
+// FIXED: Define params as a plain object
 interface PageProps {
-  params: Promise<{ quizId: string }>;
+  params: { quizId: string };
 }
 
+// FIXED: Destructure params directly
 export default function QuizPage({ params }: PageProps) {
-  const { quizId } = use(params);
+  const { quizId } = params; // No more use() hook
   const dispatch = useDispatch<AppDispatch>();
   const { quizzes, loading, error } = useSelector((state: RootState) => state.materials);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);

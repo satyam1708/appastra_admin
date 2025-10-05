@@ -1,7 +1,7 @@
 // app/courses/[courseType]/[courseSlug]/page.tsx
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/src/store/store";
 import { fetchCourseBySlug } from "@/src/features/courses/coursesThunks";
@@ -11,19 +11,21 @@ import { Video, BookOpen, Layers } from "lucide-react";
 import { Course, Batch } from "@/src/types";
 import PurchaseModal from "@/components/PurchaseModal";
 import { openAuthModal } from "@/src/features/auth/authSlice";
-import { fetchUserEnrollments } from "@/src/features/enrollments/enrollmentThunks"; // 👈 Import the thunk
-import { useMemo } from "react"; // 👈 Import useMemo
+import { fetchUserEnrollments } from "@/src/features/enrollments/enrollmentThunks";
+import { useMemo } from "react";
 import Link from "next/link";
 import EnrolledCourseView from "@/components/EnrolledCourseView";
 
+// FIXED: Define params as a plain object
 interface PageProps {
-  params: Promise<{ courseSlug: string }>;
+  params: { courseSlug: string };
 }
 
 type Tab = "description" | "classes" | "notes" | "tests" | "batches";
 
+// FIXED: Destructure params directly
 export default function CourseDetailPage({ params }: PageProps) {
-  const { courseSlug } = use(params);
+  const { courseSlug } = params; // No more use() hook
   const dispatch = useDispatch<AppDispatch>();
   const { currentCourse, loading, error } = useSelector(
     (state: RootState) => state.courses
@@ -33,7 +35,7 @@ export default function CourseDetailPage({ params }: PageProps) {
   // State for the purchase flow
   const [isPurchaseModalOpen, setPurchaseModalOpen] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState<Batch | null>(null);
-  const { enrollments } = useSelector((state: RootState) => state.enrollments); // 👈 Get enrollments from state
+  const { enrollments } = useSelector((state: RootState) => state.enrollments);
 
   const [activeTab, setActiveTab] = useState<Tab>("batches");
 
@@ -48,7 +50,6 @@ export default function CourseDetailPage({ params }: PageProps) {
   }, [dispatch, courseSlug, isAuthenticated]);
 
 
-  // ✅ FIXED: Find the specific batch the user is enrolled in for THIS course
   const enrolledBatch = useMemo(() => {
     if (!currentCourse || !enrollments || enrollments.length === 0) {
       return null;
@@ -71,8 +72,8 @@ export default function CourseDetailPage({ params }: PageProps) {
 
     if (currentCourse) {
       if (batch.isPaid) {
-        setSelectedBatch(batch); // Set the selected batch
-        setPurchaseModalOpen(true); // Then open the modal
+        setSelectedBatch(batch);
+        setPurchaseModalOpen(true);
       } else {
         dispatch(
           enrollInCourse({ courseId: currentCourse.id, batchId: batch.id })
@@ -84,7 +85,6 @@ export default function CourseDetailPage({ params }: PageProps) {
     }
   };
 
-  // Close the modal and clear the selected batch
   const handleCloseModal = () => {
     setPurchaseModalOpen(false);
     setSelectedBatch(null);
@@ -188,7 +188,6 @@ export default function CourseDetailPage({ params }: PageProps) {
             <p className="text-gray-500 mb-6">
               By {currentCourse.teacher?.name || "AppAstra"}
             </p>
-            {/* 👇 Hide tabs for enrolled users */}
             {!isEnrolled && (
               <div className="flex space-x-2 border-b mb-6">
                 <TabButton tabName="batches" label="Batches" icon={Layers} />
@@ -227,7 +226,7 @@ export default function CourseDetailPage({ params }: PageProps) {
                 </h2>
                 {isEnrolled ? (
                   <Link
-                    href="#course-content" // Link to an ID we will add later
+                    href="#course-content"
                     className="w-full text-center block px-6 py-3 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition"
                   >
                     Go to Course Content
