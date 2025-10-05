@@ -3,42 +3,31 @@
 
 import React from "react";
 import { Provider } from "react-redux";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { store } from "../src/store/store";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
-import Footer from "../components/Footer";
+import AuthModal from "@/components/AuthModal";
 import "./globals.css";
-import '../src/styles/theme.css';
-
-const queryClient = new QueryClient();
+import '../src/styles/theme.css'; // We will modify this for theming
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // A simple state to manage sidebar visibility on mobile
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+
   return (
-    <html lang="en">
-      <body className="bg-gray-50 min-h-screen">
+    <html lang="en" className="light"> {/* Default to light mode */}
+      <body>
         <Provider store={store}>
-          <QueryClientProvider client={queryClient}>
-            {/* Fixed Navbar */}
-            <div className="fixed top-0 left-0 w-full z-50">
-              <Navbar />
+          <div className="flex h-screen bg-background text-foreground">
+            <Sidebar isOpen={isSidebarOpen} setOpen={setIsSidebarOpen} />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <Navbar onMenuClick={() => setIsSidebarOpen(p => !p)} />
+              <main className="flex-1 overflow-x-hidden overflow-y-auto bg-background p-6">
+                {children}
+              </main>
             </div>
-
-            <div className="flex pt-[64px]">
-              {/* Fixed Sidebar */}
-              <div className="fixed top-[62px] left-0 w-64 h-[calc(100vh-64px)] bg-white shadow-lg border-r border-gray-200 overflow-y-auto">
-                <Sidebar />
-              </div>
-
-              {/* Scrollable Content */}
-              <div className="ml-64 flex flex-col flex-1 min-h-[calc(100vh-64px)]">
-                <main className="flex-grow p-6 overflow-y-auto">
-                  {children}
-                </main>
-                <Footer />
-              </div>
-            </div>
-          </QueryClientProvider>
+          </div>
+          <AuthModal />
         </Provider>
       </body>
     </html>
