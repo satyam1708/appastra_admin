@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/src/store/store";
 import { openAuthModal } from "@/src/features/auth/authSlice";
-import AuthModal from "./AuthModal";
 import ProfileDropdown from "./ProfileDropdown";
 import ThemeSwitcher from "./ThemeSwitcher"; // Import the switcher
 import { Menu } from 'lucide-react';
@@ -52,7 +51,6 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
           </div>
         </nav>
       </header>
-      <AuthModal />
     </>
   );
 }
