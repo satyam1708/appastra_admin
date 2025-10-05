@@ -61,6 +61,7 @@ export interface Class {
   isLive: boolean;
   startTime?: string;
   endTime?: string;
+  subjectId?: string;
 }
 
 export interface Enrollment {
