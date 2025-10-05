@@ -1,23 +1,23 @@
 // app/courses/[courseType]/page.tsx
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, use, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../src/store/store";
 import { fetchCourses } from "../../../src/features/courses/coursesThunks";
-import { fetchUserEnrollments } from "../../../src/features/enrollments/enrollmentThunks";
+import { fetchUserEnrollments } from "../../../src/features/enrollments/enrollmentThunks"; // 👈 Import
+import CourseCard from "../../../components/CourseCard";
 import BatchCard from "../../../components/BatchCard";
 import { Course, Batch } from "../../../src/types";
 
-// CORRECTED: Define params as a plain object
 interface PageProps {
-  params: { courseType: "paid-courses" | "free-courses" };
+  params: Promise<{ courseType: "paid-courses" | "free-courses" }>;
 }
 
-// CORRECTED: Destructure params directly
 export default function CoursesPage({ params }: PageProps) {
-  const { courseType } = params;
+  const { courseType } = use(params);
   const dispatch = useDispatch<AppDispatch>();
+  // 👇 Get auth and enrollment state
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const { enrollments } = useSelector((state: RootState) => state.enrollments);
   const { courses, loading, error } = useSelector(
@@ -31,11 +31,12 @@ export default function CoursesPage({ params }: PageProps) {
     if (courses.length === 0) {
       dispatch(fetchCourses());
     }
+    // 👇 Fetch enrollments if the user is logged in
     if (isAuthenticated) {
       dispatch(fetchUserEnrollments());
     }
   }, [dispatch, courses.length, isAuthenticated]);
-
+  // 👇 Create an efficient lookup set for enrolled batch IDs
   const enrolledBatchIds = useMemo(
     () => new Set(enrollments.map((e) => e.batchId)),
     [enrollments]
@@ -47,8 +48,10 @@ export default function CoursesPage({ params }: PageProps) {
     if (loading) return <p className="text-center p-10">Loading...</p>;
     if (error) return <p className="text-center p-10 text-red-500">{error}</p>;
 
+    // If a course goal is selected, show batches from that course
     if (selectedCourse) {
       const batchesToShow = selectedCourse.batches.filter((batch) => {
+        // Filter batches based on the page type (paid/free)
         return isPaidPage ? batch.isPaid : !batch.isPaid;
       });
 
@@ -65,8 +68,9 @@ export default function CoursesPage({ params }: PageProps) {
         </div>
       );
     } else {
+      // If no course goal is selected, show all relevant batches from all courses
       const allBatches = courses.flatMap(
-        (course) => course.batches.map((batch) => ({ ...batch, course }))
+        (course) => course.batches.map((batch) => ({ ...batch, course })) // Attach course info to each batch
       );
 
       const filteredBatches = allBatches.filter((batch) =>
