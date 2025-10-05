@@ -5,7 +5,6 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../src/store/store";
 import { fetchCourses } from "../src/features/courses/coursesThunks";
-import AboutSection from "../components/AboutSection";
 
 export default function Home() {
   const dispatch = useDispatch<AppDispatch>();
@@ -29,9 +28,6 @@ export default function Home() {
         <p className="text-center p-10">Loading Courses...</p>
       )}
       {error && <p className="text-center p-10 text-red-500">{error}</p>}
-
-      {/* Pass the fetched courses as props */}
-      <AboutSection />
     </div>
   );
 }
