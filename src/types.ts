@@ -19,6 +19,8 @@ export interface Batch {
   price?: number;
   mrp?: number;
   imageUrl?: string;
+  subjects?: Subject[];
+  classes?: Class[];
 }
 
 export interface Course {
