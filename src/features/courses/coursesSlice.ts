@@ -1,6 +1,6 @@
 // src/features/courses/coursesSlice.ts
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchCourses, fetchCourseBySlug, createCourse } from "./coursesThunks";
+import { fetchCourses, fetchCourseBySlug, createCourse, updateCourse, deleteCourse } from "./coursesThunks";
 import { Course } from "@/src/types"; // ✅ IMPORT the correct Course type
 
 interface CoursesState {
@@ -57,7 +57,16 @@ const coursesSlice = createSlice({
       .addCase(createCourse.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      });
+      })
+      .addCase(updateCourse.fulfilled, (state, action) => {
+        const index = state.courses.findIndex(course => course.id === action.payload.id);
+        if (index !== -1) {
+          state.courses[index] = action.payload;
+        }
+      })
+      .addCase(deleteCourse.fulfilled, (state, action) => {
+        state.courses = state.courses.filter(course => course.id !== action.payload);
+      });;
   },
 });
 
