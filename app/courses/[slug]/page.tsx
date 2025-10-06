@@ -1,3 +1,4 @@
+// app/courses/[slug]/page.tsx
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -23,7 +24,7 @@ export default function CourseDetailPage() {
 
   const { register: subjectRegister, handleSubmit: handleSubjectSubmit, reset: resetSubjectForm } = useForm();
   const { register: classRegister, handleSubmit: handleClassSubmit, reset: resetClassForm } = useForm();
-  const { handleSubmit: handleBatchSubmit, reset: resetBatchForm, control } = useForm();
+  const { handleSubmit: handleBatchSubmit, reset: resetBatchForm } = useForm();
 
   // State for modals
   const [isSubjectModalOpen, setIsSubjectModalOpen] = useState(false);
@@ -77,7 +78,13 @@ export default function CourseDetailPage() {
   };
 
   const onBatchSubmit = (data: FieldValues) => {
-    const batchData = { ...editingBatch, ...data, courseId: currentCourse!.id };
+    // FIX: Convert date to ISO string before sending
+    const batchData = {
+      ...editingBatch,
+      ...data,
+      courseId: currentCourse!.id,
+      startDate: new Date(data.startDate).toISOString(),
+    };
     const promise = editingBatch
       ? dispatch(updateBatch(batchData))
       : dispatch(createBatch(batchData));
@@ -87,7 +94,6 @@ export default function CourseDetailPage() {
       refetchCourse();
     });
   };
-
 
   const openSubjectModal = (subject: Subject | null = null) => {
     setEditingSubject(subject);
