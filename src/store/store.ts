@@ -12,6 +12,7 @@ import adminReducer from "../features/admin/adminSlice";
 import crmReducer from "../features/crm/crmSlice";
 import liveReducer from "../features/live/liveSlice";
 import testReducer from "../features/tests/testSlice";
+import batchesReducer from "../features/batches/batchesSlice";
 
 export const store = configureStore({
   reducer: {
@@ -26,6 +27,7 @@ export const store = configureStore({
     crm: crmReducer,
     live: liveReducer,
     tests: testReducer,
+    batches: batchesReducer,
   },
 });
 
