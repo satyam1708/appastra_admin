@@ -2,37 +2,55 @@
 
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '@/src/store/store';
-import { fetchCourses, createCourse } from '@/src/features/courses/coursesThunks';
-import { useForm, FieldValues } from 'react-hook-form';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { PlusCircle } from 'lucide-react';
+import { AppDispatch, RootState } from '../../src/store/store';
+import { fetchCourses, createCourse, updateCourse, deleteCourse } from '../../src/features/courses/coursesThunks';
+import { Course } from '../../src/types';
 import Link from 'next/link';
+import Modal from '@/components/Modal';
+import CourseForm from '@/components/CourseForm';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 
 export default function CoursesPage() {
   const dispatch = useDispatch<AppDispatch>();
   const { courses, loading, error } = useSelector((state: RootState) => state.courses);
-  const { register, handleSubmit, reset } = useForm();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
 
   useEffect(() => {
     dispatch(fetchCourses());
   }, [dispatch]);
 
-  const onSubmit = (data: FieldValues) => {
-    const courseData = {
-      name: data.name,
-      description: data.description,
-      price: parseFloat(data.price),
-      isPaid: data.isPaid,
-      teacherId: data.teacherId,
-      slug: data.name.toLowerCase().replace(/\s+/g, '-'),
-    };
-    dispatch(createCourse(courseData)).then(() => {
-      setIsDialogOpen(false);
-      reset();
-      dispatch(fetchCourses());
-    });
+  const handleCreate = () => {
+    setSelectedCourse(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (course: Course) => {
+    setSelectedCourse(course);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = (course: Course) => {
+    setSelectedCourse(course);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleFormSubmit = (data: Partial<Course>) => {
+    if (selectedCourse) {
+      dispatch(updateCourse({ ...selectedCourse, ...data }));
+    } else {
+      dispatch(createCourse(data));
+    }
+    setIsModalOpen(false);
+  };
+
+  const confirmDelete = () => {
+    if (selectedCourse) {
+      dispatch(deleteCourse(selectedCourse.id));
+    }
+    setIsDeleteModalOpen(false);
   };
 
   if (loading) return <p className="text-center p-10">Loading courses...</p>;
@@ -41,56 +59,43 @@ export default function CoursesPage() {
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Course Management</h1>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <button className="bg-primary text-primary-foreground px-4 py-2 rounded-md flex items-center gap-2">
-              <PlusCircle size={18} /> Create Course
-            </button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create a New Course</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div>
-                <label className="block mb-1 font-medium">Course Name</label>
-                <input {...register('name')} className="w-full p-2 border rounded-md" required />
-              </div>
-              <div>
-                <label className="block mb-1 font-medium">Description</label>
-                <textarea {...register('description')} className="w-full p-2 border rounded-md" />
-              </div>
-              <div>
-                <label className="block mb-1 font-medium">Price</label>
-                <input type="number" {...register('price')} className="w-full p-2 border rounded-md" />
-              </div>
-              <div className="flex items-center gap-2">
-                <input type="checkbox" {...register('isPaid')} />
-                <label>Is this a paid course?</label>
-              </div>
-              <div>
-                <label className="block mb-1 font-medium">Teacher ID</label>
-                <input {...register('teacherId')} className="w-full p-2 border rounded-md" />
-              </div>
-              <button type="submit" className="px-4 py-2 bg-primary text-primary-foreground rounded-md">
-                Create Course
-              </button>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <h1 className="text-3xl font-bold">Courses</h1>
+        <button onClick={handleCreate} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+          Add Course
+        </button>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {courses.map((course) => (
-          <Link href={`/courses/${course.slug}`} key={course.id}>
-            <div className="bg-card p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-              <h2 className="text-xl font-semibold">{course.name}</h2>
-              <p className="text-muted-foreground">{course.description}</p>
+        {courses.map((course: Course) => (
+          <div key={course.id} className="bg-white rounded-lg shadow-md p-4 flex flex-col justify-between">
+            <div>
+              <h3 className="text-xl font-semibold">{course.name}</h3>
+              <p className="text-gray-600">{course.description}</p>
             </div>
-          </Link>
+            <div className="mt-4 flex justify-end space-x-2">
+              <Link href={`/courses/${course.slug}`} className="px-3 py-1 bg-gray-200 text-sm rounded-md hover:bg-gray-300">
+                View
+              </Link>
+              <button onClick={() => handleEdit(course)} className="px-3 py-1 bg-yellow-500 text-white text-sm rounded-md hover:bg-yellow-600">
+                Edit
+              </button>
+              <button onClick={() => handleDelete(course)} className="px-3 py-1 bg-red-600 text-white text-sm rounded-md hover:bg-red-700">
+                Delete
+              </button>
+            </div>
+          </div>
         ))}
       </div>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={selectedCourse ? 'Edit Course' : 'Create Course'}>
+        <CourseForm onSubmit={handleFormSubmit} course={selectedCourse} />
+      </Modal>
+
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        itemName={selectedCourse?.name || ''}
+      />
     </div>
   );
 }

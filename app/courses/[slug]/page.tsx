@@ -4,12 +4,15 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/src/store/store';
 import { fetchCourseBySlug } from '@/src/features/courses/coursesThunks';
-import { createSubject } from '@/src/features/subjects/subjectsThunks';
-import { createClass } from '@/src/features/classes/classesThunks';
+import { createSubject, updateSubject, deleteSubject } from '@/src/features/subjects/subjectsThunks';
+import { createClass, updateClass, deleteClass } from '@/src/features/classes/classesThunks';
 import { useParams } from 'next/navigation';
 import { useForm, FieldValues } from 'react-hook-form';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { PlusCircle, PlayCircle } from 'lucide-react';
+import { PlusCircle, PlayCircle, Edit, Trash2 } from 'lucide-react';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
+import Modal from '@/components/Modal';
+import { Subject, Class } from '@/src/types';
 
 export default function CourseDetailPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -20,9 +23,19 @@ export default function CourseDetailPage() {
   const { register: subjectRegister, handleSubmit: handleSubjectSubmit, reset: resetSubjectForm } = useForm();
   const { register: classRegister, handleSubmit: handleClassSubmit, reset: resetClassForm } = useForm();
 
-  const [isSubjectDialogOpen, setIsSubjectDialogOpen] = useState(false);
-  const [isClassDialogOpen, setIsClassDialogOpen] = useState(false);
-  const [classDialogContext, setClassDialogContext] = useState<{ type: 'subject' | 'batch', id: string, name: string } | null>(null);
+  // State for modals
+  const [isSubjectModalOpen, setIsSubjectModalOpen] = useState(false);
+  const [isClassModalOpen, setIsClassModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  
+  // State for tracking what is being edited or deleted
+  const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
+  const [editingClass, setEditingClass] = useState<Class | null>(null);
+  const [deletingItem, setDeletingItem] = useState<{ type: 'subject' | 'class', id: string, name: string } | null>(null);
+
+  // Context for adding a class to a subject or batch
+  const [classContext, setClassContext] = useState<{ type: 'subject' | 'batch', id: string, name: string } | null>(null);
+  
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -32,34 +45,61 @@ export default function CourseDetailPage() {
   }, [dispatch, slug]);
 
   const onSubjectSubmit = (data: FieldValues) => {
-    if (currentCourse) {
-      dispatch(createSubject({ courseId: currentCourse.id, name: data.name, description: data.description }))
-        .then(() => {
-          setIsSubjectDialogOpen(false);
-          resetSubjectForm();
-          dispatch(fetchCourseBySlug(slug as string));
-        });
+    if (editingSubject) {
+      dispatch(updateSubject({ ...editingSubject, ...data }));
+    } else if (currentCourse) {
+      dispatch(createSubject({ courseId: currentCourse.id, ...data }));
     }
+    closeSubjectModal();
   };
   
   const onClassSubmit = (data: FieldValues) => {
-    if (classDialogContext?.type === 'subject') {
-      dispatch(createClass({ subjectId: classDialogContext.id, title: data.title, description: data.description, videoUrl: data.videoUrl }))
-        .unwrap()
-        .then(() => {
-          setIsClassDialogOpen(false);
-          resetClassForm();
-          dispatch(fetchCourseBySlug(slug as string));
-        });
-    } else if (classDialogContext?.type === 'batch') {
-      // NOTE: This functionality requires a backend endpoint to create a class with a `batchId`.
-      // The current backend only supports creating a class under a subject.
-      // For now, this will just close the dialog.
-      console.warn("Backend functionality to add a class directly to a batch is required.");
-      alert("Backend functionality to add a class directly to a batch is required.");
-      setIsClassDialogOpen(false);
-      resetClassForm();
+    if (editingClass) {
+        dispatch(updateClass({ ...editingClass, ...data }));
+    } else if (classContext) {
+        dispatch(createClass({ subjectId: classContext.id, ...data }));
     }
+    closeClassModal();
+  };
+
+  const openSubjectModal = (subject: Subject | null = null) => {
+    setEditingSubject(subject);
+    resetSubjectForm(subject || {});
+    setIsSubjectModalOpen(true);
+  };
+
+  const closeSubjectModal = () => {
+    setIsSubjectModalOpen(false);
+    setEditingSubject(null);
+  };
+
+  const openClassModal = (context: { type: 'subject' | 'batch', id: string, name: string }, classToEdit: Class | null = null) => {
+    setClassContext(context);
+    setEditingClass(classToEdit);
+    resetClassForm(classToEdit || {});
+    setIsClassModalOpen(true);
+  };
+
+  const closeClassModal = () => {
+    setIsClassModalOpen(false);
+    setEditingClass(null);
+    setClassContext(null);
+  };
+  
+  const openDeleteModal = (item: { type: 'subject' | 'class', id: string, name: string }) => {
+    setDeletingItem(item);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (deletingItem) {
+      if (deletingItem.type === 'subject') {
+        dispatch(deleteSubject(deletingItem.id));
+      } else {
+        dispatch(deleteClass(deletingItem.id));
+      }
+    }
+    setIsDeleteModalOpen(false);
   };
 
   if (loading) return <p className="text-center p-10">Loading course details...</p>;
@@ -68,104 +108,85 @@ export default function CourseDetailPage() {
 
   return (
     <div className="container mx-auto p-4">
-      {/* --- Main Dialog for Adding Classes --- */}
-      <Dialog open={isClassDialogOpen} onOpenChange={setIsClassDialogOpen}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Add a New Class to {classDialogContext?.name}</DialogTitle></DialogHeader>
-          <form onSubmit={handleClassSubmit(onClassSubmit)} className="space-y-4">
-            <input {...classRegister('title')} placeholder="Class Title" className="w-full p-2 border rounded-md" required />
-            <textarea {...classRegister('description')} placeholder="Class Description" className="w-full p-2 border rounded-md" />
-            <input {...classRegister('videoUrl')} placeholder="Video URL" className="w-full p-2 border rounded-md" />
-            <button type="submit" className="px-4 py-2 bg-primary text-primary-foreground rounded-md">Add Class</button>
-          </form>
-        </DialogContent>
-      </Dialog>
-
       {/* --- Course Header --- */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold mb-2 text-foreground">{currentCourse.name}</h1>
-          <p className="text-muted-foreground mb-6">{currentCourse.description}</p>
+          <h1 className="text-3xl font-bold text-foreground">{currentCourse.name}</h1>
+          <p className="text-muted-foreground">{currentCourse.description}</p>
         </div>
-        <Dialog open={isSubjectDialogOpen} onOpenChange={setIsSubjectDialogOpen}>
-          <DialogTrigger asChild>
-            <button className="bg-primary text-primary-foreground px-4 py-2 rounded-md flex items-center gap-2">
-              <PlusCircle size={18} /> Add Subject
-            </button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>Add a New Subject</DialogTitle></DialogHeader>
-            <form onSubmit={handleSubjectSubmit(onSubjectSubmit)} className="space-y-4">
-              <input {...subjectRegister('name')} placeholder="Subject Name" className="w-full p-2 border rounded-md" required />
-              <textarea {...subjectRegister('description')} placeholder="Subject Description" className="w-full p-2 border rounded-md" />
-              <button type="submit" className="px-4 py-2 bg-primary text-primary-foreground rounded-md">Add Subject</button>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <button onClick={() => openSubjectModal()} className="bg-primary text-primary-foreground px-4 py-2 rounded-md flex items-center gap-2">
+          <PlusCircle size={18} /> Add Subject
+        </button>
       </div>
 
-      {/* --- Batches List --- */}
+      {/* --- Batches and Subjects --- */}
       <div>
         <h2 className="text-2xl font-semibold mb-4">Batches</h2>
         {currentCourse.batches.map(batch => (
           <div key={batch.id} className="bg-card p-4 rounded-lg shadow-md mb-4 border">
             <h3 className="text-xl font-semibold">{batch.name}</h3>
-            
-            {/* Subjects within Batch */}
-            {batch.subjects && batch.subjects.length > 0 && (
-              <div className="mt-4 border-t pt-4">
-                <h4 className="font-semibold text-lg">Subjects:</h4>
-                <ul className="list-disc list-inside ml-4 mt-2 space-y-3">
-                  {batch.subjects.map(subject => (
-                    <li key={subject.id}>
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">{subject.name}</span>
-                        <DialogTrigger asChild>
-                          <button onClick={() => { setClassDialogContext({ type: 'subject', id: subject.id, name: subject.name }); setIsClassDialogOpen(true); }} className="text-sm bg-secondary text-secondary-foreground px-2 py-1 rounded-md flex items-center gap-1">
-                            <PlusCircle size={14} /> Add Class
-                          </button>
-                        </DialogTrigger>
-                      </div>
-                      <ul className="list-circle list-inside ml-6 mt-1 text-sm text-muted-foreground">
-                        {subject.classes?.map(cls => (
-                          <li key={cls.id} className="flex items-center gap-2">
-                            {cls.title}
-                            {cls.videoUrl && <button onClick={() => setVideoUrl(cls.videoUrl!)} className="text-primary"><PlayCircle size={16} /></button>}
-                          </li>
-                        ))}
-                      </ul>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
 
-            {/* Standalone Classes within Batch */}
             <div className="mt-4 border-t pt-4">
-               <div className="flex justify-between items-center">
-                <h4 className="font-semibold text-lg">Standalone Classes:</h4>
-                 <DialogTrigger asChild>
-                    <button onClick={() => { setClassDialogContext({ type: 'batch', id: batch.id, name: batch.name }); setIsClassDialogOpen(true); }} className="text-sm bg-secondary text-secondary-foreground px-2 py-1 rounded-md flex items-center gap-1">
-                      <PlusCircle size={14} /> Add Class
-                    </button>
-                  </DialogTrigger>
-              </div>
-              {batch.classes && batch.classes.length > 0 ? (
-                <ul className="list-disc list-inside ml-4 mt-2 space-y-1 text-sm">
-                  {batch.classes.map(cls => (
-                    <li key={cls.id} className="flex items-center gap-2">
-                      {cls.title}
-                      {cls.videoUrl && <button onClick={() => setVideoUrl(cls.videoUrl!)} className="text-primary"><PlayCircle size={16} /></button>}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-muted-foreground ml-4 mt-2">No standalone classes in this batch.</p>
-              )}
+              <h4 className="font-semibold text-lg">Subjects:</h4>
+              <ul className="list-disc list-inside ml-4 mt-2 space-y-3">
+                {batch.subjects?.map(subject => (
+                  <li key={subject.id}>
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">{subject.name}</span>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => openClassModal({ type: 'subject', id: subject.id, name: subject.name })} className="text-sm bg-secondary text-secondary-foreground px-2 py-1 rounded-md flex items-center gap-1">
+                          <PlusCircle size={14} /> Add Class
+                        </button>
+                        <button onClick={() => openSubjectModal(subject)} className="text-sm p-1"><Edit size={14} /></button>
+                        <button onClick={() => openDeleteModal({type: 'subject', id: subject.id, name: subject.name})} className="text-sm p-1 text-red-500"><Trash2 size={14} /></button>
+                      </div>
+                    </div>
+                    <ul className="list-circle list-inside ml-6 mt-1 text-sm text-muted-foreground">
+                      {subject.classes?.map(cls => (
+                        <li key={cls.id} className="flex items-center gap-2 justify-between">
+                            <span>
+                                {cls.title}
+                                {cls.videoUrl && <button onClick={() => setVideoUrl(cls.videoUrl!)} className="text-primary ml-2"><PlayCircle size={16} /></button>}
+                            </span>
+                            <div>
+                                <button onClick={() => openClassModal({ type: 'subject', id: subject.id, name: subject.name }, cls)} className="text-sm p-1"><Edit size={14} /></button>
+                                <button onClick={() => openDeleteModal({type: 'class', id: cls.id, name: cls.title})} className="text-sm p-1 text-red-500"><Trash2 size={14} /></button>
+                            </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         ))}
       </div>
+
+      {/* Modals */}
+      <Modal isOpen={isSubjectModalOpen} onClose={closeSubjectModal} title={editingSubject ? 'Edit Subject' : 'Create Subject'}>
+        <form onSubmit={handleSubjectSubmit(onSubjectSubmit)} className="space-y-4">
+          <input {...subjectRegister('name')} placeholder="Subject Name" className="w-full p-2 border rounded-md" required />
+          <textarea {...subjectRegister('description')} placeholder="Subject Description" className="w-full p-2 border rounded-md" />
+          <button type="submit" className="px-4 py-2 bg-primary text-primary-foreground rounded-md">{editingSubject ? 'Update' : 'Create'}</button>
+        </form>
+      </Modal>
+
+      <Modal isOpen={isClassModalOpen} onClose={closeClassModal} title={editingClass ? 'Edit Class' : `Add Class to ${classContext?.name}`}>
+        <form onSubmit={handleClassSubmit(onClassSubmit)} className="space-y-4">
+          <input {...classRegister('title')} placeholder="Class Title" className="w-full p-2 border rounded-md" required />
+          <textarea {...classRegister('description')} placeholder="Class Description" className="w-full p-2 border rounded-md" />
+          <input {...classRegister('videoUrl')} placeholder="Video URL" className="w-full p-2 border rounded-md" />
+          <button type="submit" className="px-4 py-2 bg-primary text-primary-foreground rounded-md">{editingClass ? 'Update' : 'Add'}</button>
+        </form>
+      </Modal>
+
+      <DeleteConfirmationModal 
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        itemName={deletingItem?.name || ''}
+      />
 
       {/* --- Video Player Modal --- */}
       {videoUrl && (
@@ -178,4 +199,3 @@ export default function CourseDetailPage() {
     </div>
   );
 }
-
