@@ -38,8 +38,8 @@ export default function CourseDetailPage() {
   const [editingBatch, setEditingBatch] = useState<Batch | null>(null);
   const [deletingItem, setDeletingItem] = useState<{ type: 'subject' | 'class' | 'batch', id: string, name: string } | null>(null);
 
-  // Context for adding a class to a subject or batch
-  const [classContext, setClassContext] = useState<{ type: 'subject' | 'batch', id: string, name: string } | null>(null);
+  // Context for adding a class or subject
+  const [context, setContext] = useState<{ type: 'subject' | 'batch', id: string, name: string } | null>(null);
 
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
@@ -57,7 +57,7 @@ export default function CourseDetailPage() {
     const subjectData = { ...editingSubject, ...data };
     const promise = editingSubject
       ? dispatch(updateSubject(subjectData))
-      : dispatch(createSubject({ courseId: currentCourse!.id, ...data }));
+      : dispatch(createSubject({ batchId: context!.id, ...data }));
 
     promise.then(() => {
       closeSubjectModal();
@@ -69,7 +69,7 @@ export default function CourseDetailPage() {
     const classData = { ...editingClass, ...data };
     const promise = editingClass
       ? dispatch(updateClass(classData))
-      : dispatch(createClass({ subjectId: classContext!.id, ...data }));
+      : dispatch(createClass({ subjectId: context!.id, ...data }));
 
     promise.then(() => {
       closeClassModal();
@@ -78,7 +78,6 @@ export default function CourseDetailPage() {
   };
 
   const onBatchSubmit = (data: FieldValues) => {
-    // FIX: Convert date to ISO string before sending
     const batchData = {
       ...editingBatch,
       ...data,
@@ -95,7 +94,8 @@ export default function CourseDetailPage() {
     });
   };
 
-  const openSubjectModal = (subject: Subject | null = null) => {
+  const openSubjectModal = (context: { type: 'batch', id: string, name: string }, subject: Subject | null = null) => {
+    setContext(context);
     setEditingSubject(subject);
     resetSubjectForm(subject || {});
     setIsSubjectModalOpen(true);
@@ -104,10 +104,11 @@ export default function CourseDetailPage() {
   const closeSubjectModal = () => {
     setIsSubjectModalOpen(false);
     setEditingSubject(null);
+    setContext(null);
   };
 
-  const openClassModal = (context: { type: 'subject' | 'batch', id: string, name: string }, classToEdit: Class | null = null) => {
-    setClassContext(context);
+  const openClassModal = (context: { type: 'subject', id: string, name: string }, classToEdit: Class | null = null) => {
+    setContext(context);
     setEditingClass(classToEdit);
     resetClassForm(classToEdit || {});
     setIsClassModalOpen(true);
@@ -116,7 +117,7 @@ export default function CourseDetailPage() {
   const closeClassModal = () => {
     setIsClassModalOpen(false);
     setEditingClass(null);
-    setClassContext(null);
+    setContext(null);
   };
 
   const openBatchModal = (batch: Batch | null = null) => {
@@ -169,14 +170,9 @@ export default function CourseDetailPage() {
           <h1 className="text-3xl font-bold text-foreground">{currentCourse.name}</h1>
           <p className="text-muted-foreground">{currentCourse.description}</p>
         </div>
-        <div className="flex gap-2">
-          <button onClick={() => openSubjectModal()} className="bg-primary text-primary-foreground px-4 py-2 rounded-md flex items-center gap-2">
-            <PlusCircle size={18} /> Add Subject
-          </button>
-          <button onClick={() => openBatchModal()} className="bg-green-600 text-white px-4 py-2 rounded-md flex items-center gap-2">
-            <PlusCircle size={18} /> Add Batch
-          </button>
-        </div>
+        <button onClick={() => openBatchModal()} className="bg-primary text-primary-foreground px-4 py-2 rounded-md flex items-center gap-2">
+          <PlusCircle size={18} /> Add Batch
+        </button>
       </div>
 
       {/* --- Batches and Subjects --- */}
@@ -187,11 +183,13 @@ export default function CourseDetailPage() {
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-semibold">{batch.name}</h3>
               <div className="flex items-center gap-2">
+                <button onClick={() => openSubjectModal({ type: 'batch', id: batch.id, name: batch.name })} className="text-sm bg-blue-600 text-white px-2 py-1 rounded-md flex items-center gap-1">
+                  <PlusCircle size={14} /> Add Subject
+                </button>
                 <button onClick={() => openBatchModal(batch)} className="text-sm p-1"><Edit size={14} /></button>
                 <button onClick={() => openDeleteModal({ type: 'batch', id: batch.id, name: batch.name })} className="text-sm p-1 text-red-500"><Trash2 size={14} /></button>
               </div>
             </div>
-
 
             <div className="mt-4 border-t pt-4">
               <h4 className="font-semibold text-lg">Subjects:</h4>
@@ -204,7 +202,7 @@ export default function CourseDetailPage() {
                         <button onClick={() => openClassModal({ type: 'subject', id: subject.id, name: subject.name })} className="text-sm bg-secondary text-secondary-foreground px-2 py-1 rounded-md flex items-center gap-1">
                           <PlusCircle size={14} /> Add Class
                         </button>
-                        <button onClick={() => openSubjectModal(subject)} className="text-sm p-1"><Edit size={14} /></button>
+                        <button onClick={() => openSubjectModal({ type: 'batch', id: batch.id, name: batch.name }, subject)} className="text-sm p-1"><Edit size={14} /></button>
                         <button onClick={() => openDeleteModal({ type: 'subject', id: subject.id, name: subject.name })} className="text-sm p-1 text-red-500"><Trash2 size={14} /></button>
                       </div>
                     </div>
@@ -231,7 +229,7 @@ export default function CourseDetailPage() {
       </div>
 
       {/* Modals */}
-      <Modal isOpen={isSubjectModalOpen} onClose={closeSubjectModal} title={editingSubject ? 'Edit Subject' : 'Create Subject'}>
+      <Modal isOpen={isSubjectModalOpen} onClose={closeSubjectModal} title={editingSubject ? 'Edit Subject' : `Add Subject to ${context?.name}`}>
         <form onSubmit={handleSubjectSubmit(onSubjectSubmit)} className="space-y-4">
           <input {...subjectRegister('name')} placeholder="Subject Name" className="w-full p-2 border rounded-md" required />
           <textarea {...subjectRegister('description')} placeholder="Subject Description" className="w-full p-2 border rounded-md" />
@@ -239,7 +237,7 @@ export default function CourseDetailPage() {
         </form>
       </Modal>
 
-      <Modal isOpen={isClassModalOpen} onClose={closeClassModal} title={editingClass ? 'Edit Class' : `Add Class to ${classContext?.name}`}>
+      <Modal isOpen={isClassModalOpen} onClose={closeClassModal} title={editingClass ? 'Edit Class' : `Add Class to ${context?.name}`}>
         <form onSubmit={handleClassSubmit(onClassSubmit)} className="space-y-4">
           <input {...classRegister('title')} placeholder="Class Title" className="w-full p-2 border rounded-md" required />
           <textarea {...classRegister('description')} placeholder="Class Description" className="w-full p-2 border rounded-md" />

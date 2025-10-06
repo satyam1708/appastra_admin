@@ -20,11 +20,12 @@ export const fetchSubjectsByCourse = createAsyncThunk<Subject[], string, { rejec
     }
   }
 );
-export const createSubject = createAsyncThunk<Subject, Partial<Subject>, { rejectValue: string }>(
+export const createSubject = createAsyncThunk<Subject, Partial<Subject> & { batchId: string }, { rejectValue: string }>(
   'subjects/create',
-  async (subjectData, { rejectWithValue }) => {
+  async (subjectData, { rejectValue }) => {
+    const { batchId, ...data } = subjectData;
     try {
-      const response = await api.post(`/subjects/course/${subjectData.courseId}`, subjectData);
+      const response = await api.post(`/subjects/batch/${batchId}`, data);
       return response.data.data;
     } catch (err: unknown) {
       const error = err as AxiosError<KnownError>;
