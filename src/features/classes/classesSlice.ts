@@ -1,7 +1,7 @@
 // src/features/classes/classesSlice.ts
 import { createSlice } from '@reduxjs/toolkit';
 import { Class } from '@/src/types';
-import { fetchClassesBySubject } from './classesThunks';
+import { fetchClassesBySubject, createClass } from './classesThunks';
 
 interface ClassesState {
   classesBySubject: Record<string, Class[]>;
@@ -32,6 +32,11 @@ const classesSlice = createSlice({
       .addCase(fetchClassesBySubject.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+      .addCase(createClass.fulfilled, (state, action) => {
+        const { subjectId } = action.meta.arg;
+        // This is a simplified update. A more robust solution might involve
+        // updating the classes within the correct subject in the courses slice.
       });
   },
 });

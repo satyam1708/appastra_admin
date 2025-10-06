@@ -34,3 +34,16 @@ export const fetchCourseBySlug = createAsyncThunk<Course, string, { rejectValue:
     }
   }
 );
+
+export const createCourse = createAsyncThunk<Course, Partial<Course>, { rejectValue: string }>(
+  'courses/createCourse',
+  async (courseData, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/courses', courseData);
+      return response.data.data;
+    } catch (err: unknown) {
+      const error = err as AxiosError<KnownError>;
+      return rejectWithValue(error.response?.data?.message || 'Failed to create course');
+    }
+  }
+);

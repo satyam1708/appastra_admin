@@ -20,3 +20,15 @@ export const fetchClassesBySubject = createAsyncThunk<Class[], string, { rejectV
     }
   }
 );
+export const createClass = createAsyncThunk<Class, { subjectId: string; title: string; description?: string; videoUrl?: string }, { rejectValue: string }>(
+  'classes/create',
+  async (classData, { rejectWithValue }) => {
+    try {
+      const response = await api.post(`/classes/subject/${classData.subjectId}`, { title: classData.title, description: classData.description, videoUrl: classData.videoUrl });
+      return response.data.data;
+    } catch (err: unknown) {
+      const error = err as AxiosError<KnownError>;
+      return rejectWithValue(error.response?.data?.message || 'Failed to create class');
+    }
+  }
+);

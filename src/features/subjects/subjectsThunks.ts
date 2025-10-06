@@ -20,3 +20,15 @@ export const fetchSubjectsByCourse = createAsyncThunk<Subject[], string, { rejec
     }
   }
 );
+export const createSubject = createAsyncThunk<Subject, { courseId: string; name: string; description?: string }, { rejectValue: string }>(
+  'subjects/create',
+  async (subjectData, { rejectWithValue }) => {
+    try {
+      const response = await api.post(`/subjects/course/${subjectData.courseId}`, { name: subjectData.name, description: subjectData.description });
+      return response.data.data;
+    } catch (err: unknown) {
+      const error = err as AxiosError<KnownError>;
+      return rejectWithValue(error.response?.data?.message || 'Failed to create subject');
+    }
+  }
+);

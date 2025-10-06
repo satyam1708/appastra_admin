@@ -1,6 +1,6 @@
 // src/features/courses/coursesSlice.ts
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchCourseBySlug, fetchCourses } from "./coursesThunks";
+import { fetchCourses, fetchCourseBySlug, createCourse } from "./coursesThunks";
 import { Course } from "@/src/types"; // ✅ IMPORT the correct Course type
 
 interface CoursesState {
@@ -46,7 +46,18 @@ const coursesSlice = createSlice({
       .addCase(fetchCourseBySlug.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      });;
+      })
+      .addCase(createCourse.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(createCourse.fulfilled, (state, action) => {
+        state.loading = false;
+        state.courses.push(action.payload);
+      })
+      .addCase(createCourse.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
   },
 });
 
