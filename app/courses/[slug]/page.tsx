@@ -38,28 +38,38 @@ export default function CourseDetailPage() {
   
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
-  useEffect(() => {
+  const refetchCourse = () => {
     if (slug) {
       dispatch(fetchCourseBySlug(slug as string));
     }
+  };
+
+  useEffect(() => {
+    refetchCourse();
   }, [dispatch, slug]);
 
   const onSubjectSubmit = (data: FieldValues) => {
-    if (editingSubject) {
-      dispatch(updateSubject({ ...editingSubject, ...data }));
-    } else if (currentCourse) {
-      dispatch(createSubject({ courseId: currentCourse.id, ...data }));
-    }
-    closeSubjectModal();
+    const subjectData = { ...editingSubject, ...data };
+    const promise = editingSubject
+      ? dispatch(updateSubject(subjectData))
+      : dispatch(createSubject({ courseId: currentCourse!.id, ...data }));
+
+    promise.then(() => {
+      closeSubjectModal();
+      refetchCourse();
+    });
   };
   
   const onClassSubmit = (data: FieldValues) => {
-    if (editingClass) {
-        dispatch(updateClass({ ...editingClass, ...data }));
-    } else if (classContext) {
-        dispatch(createClass({ subjectId: classContext.id, ...data }));
-    }
-    closeClassModal();
+    const classData = { ...editingClass, ...data };
+    const promise = editingClass
+      ? dispatch(updateClass(classData))
+      : dispatch(createClass({ subjectId: classContext!.id, ...data }));
+    
+    promise.then(() => {
+        closeClassModal();
+        refetchCourse();
+    });
   };
 
   const openSubjectModal = (subject: Subject | null = null) => {
@@ -93,16 +103,18 @@ export default function CourseDetailPage() {
 
   const confirmDelete = () => {
     if (deletingItem) {
-      if (deletingItem.type === 'subject') {
-        dispatch(deleteSubject(deletingItem.id));
-      } else {
-        dispatch(deleteClass(deletingItem.id));
-      }
+      const promise = deletingItem.type === 'subject'
+        ? dispatch(deleteSubject(deletingItem.id))
+        : dispatch(deleteClass(deletingItem.id));
+      
+      promise.then(() => {
+        setIsDeleteModalOpen(false);
+        refetchCourse();
+      });
     }
-    setIsDeleteModalOpen(false);
   };
 
-  if (loading) return <p className="text-center p-10">Loading course details...</p>;
+  if (loading && !currentCourse) return <p className="text-center p-10">Loading course details...</p>;
   if (error) return <p className="text-center p-10 text-red-500">Error: {error}</p>;
   if (!currentCourse) return <p className="text-center p-10">Course not found.</p>;
 

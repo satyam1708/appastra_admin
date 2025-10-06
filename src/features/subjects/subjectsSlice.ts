@@ -1,7 +1,7 @@
 // src/features/subjects/subjectsSlice.ts
 import { createSlice } from '@reduxjs/toolkit';
 import { Subject } from '@/src/types';
-import { fetchSubjectsByCourse, createSubject } from './subjectsThunks';
+import { fetchSubjectsByCourse,createSubject, updateSubject, deleteSubject } from './subjectsThunks';
 
 interface SubjectsState {
   subjectsByCourse: Record<string, Subject[]>;
@@ -40,7 +40,13 @@ const subjectsSlice = createSlice({
         } else {
           state.subjectsByCourse[courseId] = [action.payload];
         }
-      });;
+      })
+      .addCase(updateSubject.fulfilled, (state, action) => {
+        // This is handled by refetching the course
+      })
+      .addCase(deleteSubject.fulfilled, (state, action) => {
+        // This is handled by refetching the course
+      });
   },
 });
 

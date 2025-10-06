@@ -20,15 +20,41 @@ export const fetchSubjectsByCourse = createAsyncThunk<Subject[], string, { rejec
     }
   }
 );
-export const createSubject = createAsyncThunk<Subject, { courseId: string; name: string; description?: string }, { rejectValue: string }>(
+export const createSubject = createAsyncThunk<Subject, Partial<Subject>, { rejectValue: string }>(
   'subjects/create',
   async (subjectData, { rejectWithValue }) => {
     try {
-      const response = await api.post(`/subjects/course/${subjectData.courseId}`, { name: subjectData.name, description: subjectData.description });
+      const response = await api.post(`/subjects/course/${subjectData.courseId}`, subjectData);
       return response.data.data;
     } catch (err: unknown) {
       const error = err as AxiosError<KnownError>;
       return rejectWithValue(error.response?.data?.message || 'Failed to create subject');
+    }
+  }
+);
+
+export const updateSubject = createAsyncThunk<Subject, Partial<Subject>, { rejectValue: string }>(
+  'subjects/update',
+  async (subjectData, { rejectWithValue }) => {
+    try {
+      const response = await api.put(`/subjects/${subjectData.id}`, subjectData);
+      return response.data.data;
+    } catch (err: unknown) {
+      const error = err as AxiosError<KnownError>;
+      return rejectWithValue(error.response?.data?.message || 'Failed to update subject');
+    }
+  }
+);
+
+export const deleteSubject = createAsyncThunk<string, string, { rejectValue: string }>(
+  'subjects/delete',
+  async (subjectId, { rejectWithValue }) => {
+    try {
+      await api.delete(`/subjects/${subjectId}`);
+      return subjectId;
+    } catch (err: unknown) {
+      const error = err as AxiosError<KnownError>;
+      return rejectWithValue(error.response?.data?.message || 'Failed to delete subject');
     }
   }
 );

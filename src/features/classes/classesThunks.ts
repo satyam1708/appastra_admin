@@ -20,15 +20,41 @@ export const fetchClassesBySubject = createAsyncThunk<Class[], string, { rejectV
     }
   }
 );
-export const createClass = createAsyncThunk<Class, { subjectId: string; title: string; description?: string; videoUrl?: string }, { rejectValue: string }>(
+export const createClass = createAsyncThunk<Class, Partial<Class>, { rejectValue: string }>(
   'classes/create',
   async (classData, { rejectWithValue }) => {
     try {
-      const response = await api.post(`/classes/subject/${classData.subjectId}`, { title: classData.title, description: classData.description, videoUrl: classData.videoUrl });
+      const response = await api.post(`/classes/subject/${classData.subjectId}`, classData);
       return response.data.data;
     } catch (err: unknown) {
       const error = err as AxiosError<KnownError>;
       return rejectWithValue(error.response?.data?.message || 'Failed to create class');
+    }
+  }
+);
+
+export const updateClass = createAsyncThunk<Class, Partial<Class>, { rejectValue: string }>(
+  'classes/update',
+  async (classData, { rejectWithValue }) => {
+    try {
+      const response = await api.put(`/classes/${classData.id}`, classData);
+      return response.data.data;
+    } catch (err: unknown) {
+      const error = err as AxiosError<KnownError>;
+      return rejectWithValue(error.response?.data?.message || 'Failed to update class');
+    }
+  }
+);
+
+export const deleteClass = createAsyncThunk<string, string, { rejectValue: string }>(
+  'classes/delete',
+  async (classId, { rejectWithValue }) => {
+    try {
+      await api.delete(`/classes/${classId}`);
+      return classId;
+    } catch (err: unknown) {
+      const error = err as AxiosError<KnownError>;
+      return rejectWithValue(error.response?.data?.message || 'Failed to delete class');
     }
   }
 );
