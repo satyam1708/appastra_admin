@@ -25,7 +25,13 @@ export const updateBatch = createAsyncThunk<Batch, Partial<Batch>, { rejectValue
   'batches/update',
   async (batchData, { rejectWithValue }) => {
     try {
-      const response = await api.put(`/batches/${batchData.id}`, batchData);
+      // FIX: Ensure numeric values are sent as numbers.
+      const dataToSend = {
+        ...batchData,
+        price: batchData.price ? parseFloat(batchData.price as any) : undefined,
+        mrp: batchData.mrp ? parseFloat(batchData.mrp as any) : undefined,
+      };
+      const response = await api.put(`/batches/${batchData.id}`, dataToSend);
       return response.data.data;
     } catch (err: unknown) {
       const error = err as AxiosError<KnownError>;

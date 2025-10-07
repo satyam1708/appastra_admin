@@ -24,7 +24,8 @@ export const createClass = createAsyncThunk<Class, Partial<Class>, { rejectValue
   'classes/create',
   async (classData, { rejectWithValue }) => {
     try {
-      const { subjectId, ...data } = classData; 
+      // FIX: Destructure subjectId and send the rest of the data in the body.
+      const { subjectId, ...data } = classData;
       const response = await api.post(`/classes/subject/${subjectId}`, data);
       return response.data.data;
     } catch (err: unknown) {

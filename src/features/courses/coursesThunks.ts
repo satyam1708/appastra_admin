@@ -61,7 +61,9 @@ export const updateCourse = createAsyncThunk<
   { rejectValue: string }
 >("courses/updateCourse", async (courseData, { rejectWithValue }) => {
   try {
-    const response = await api.put(`/courses/${courseData.id}`, courseData);
+    // FIX: Destructure id from courseData and use it in the URL.
+    const { id, ...data } = courseData;
+    const response = await api.put(`/courses/${id}`, data);
     return response.data.data;
   } catch (err: unknown) {
     const error = err as AxiosError<KnownError>;
