@@ -25,13 +25,18 @@ export const updateBatch = createAsyncThunk<Batch, Partial<Batch>, { rejectValue
   'batches/update',
   async (batchData, { rejectWithValue }) => {
     try {
-      // FIX: Ensure numeric values are sent as numbers.
-      const dataToSend = {
-        ...batchData,
-        price: batchData.price ? parseFloat(batchData.price as any) : undefined,
-        mrp: batchData.mrp ? parseFloat(batchData.mrp as any) : undefined,
-      };
-      const response = await api.put(`/batches/${batchData.id}`, dataToSend);
+      // FIX: Remove non-editable fields from the batch data payload.
+      const { id, subjects, classes, ...dataToUpdate } = batchData;
+      
+      // Also ensure price and mrp are numbers
+      if (dataToUpdate.price) {
+        dataToUpdate.price = parseFloat(dataToUpdate.price as any);
+      }
+      if (dataToUpdate.mrp) {
+        dataToUpdate.mrp = parseFloat(dataToUpdate.mrp as any);
+      }
+
+      const response = await api.put(`/batches/${id}`, dataToUpdate);
       return response.data.data;
     } catch (err: unknown) {
       const error = err as AxiosError<KnownError>;

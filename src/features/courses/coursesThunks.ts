@@ -59,10 +59,10 @@ export const updateCourse = createAsyncThunk<
   Course,
   Partial<Course>,
   { rejectValue: string }
->("courses/updateCourse", async (courseData, { rejectValue }) => {
+>("courses/updateCourse", async (courseData, { rejectWithValue }) => {
   try {
-    // FIX: Destructure read-only fields to exclude them from the request body.
-    const { id, slug, createdAt, updatedAt, batches, subjects, teacher, ...dataToUpdate } = courseData;
+    // FIX: Destructure and remove all fields not in the backend's update schema.
+    const { id, slug, batches, subjects, createdAt, updatedAt, teacher, ...dataToUpdate } = courseData;
     const response = await api.put(`/courses/${id}`, dataToUpdate);
     return response.data.data;
   } catch (err: unknown) {

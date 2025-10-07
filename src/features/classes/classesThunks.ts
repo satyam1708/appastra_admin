@@ -39,7 +39,9 @@ export const updateClass = createAsyncThunk<Class, Partial<Class>, { rejectValue
   'classes/update',
   async (classData, { rejectWithValue }) => {
     try {
-      const response = await api.put(`/classes/${classData.id}`, classData);
+      // FIX: Remove non-editable fields.
+      const { id, subjectId, ...dataToUpdate } = classData;
+      const response = await api.put(`/classes/${id}`, dataToUpdate);
       return response.data.data;
     } catch (err: unknown) {
       const error = err as AxiosError<KnownError>;
@@ -47,7 +49,6 @@ export const updateClass = createAsyncThunk<Class, Partial<Class>, { rejectValue
     }
   }
 );
-
 export const deleteClass = createAsyncThunk<string, string, { rejectValue: string }>(
   'classes/delete',
   async (classId, { rejectWithValue }) => {

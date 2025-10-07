@@ -38,7 +38,9 @@ export const updateSubject = createAsyncThunk<Subject, Partial<Subject>, { rejec
   'subjects/update',
   async (subjectData, { rejectWithValue }) => {
     try {
-      const response = await api.put(`/subjects/${subjectData.id}`, subjectData);
+      // FIX: Remove non-editable fields.
+      const { id, classes, resources, ...dataToUpdate } = subjectData;
+      const response = await api.put(`/subjects/${id}`, dataToUpdate);
       return response.data.data;
     } catch (err: unknown) {
       const error = err as AxiosError<KnownError>;
