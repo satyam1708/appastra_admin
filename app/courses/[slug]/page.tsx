@@ -131,7 +131,6 @@ export default function CourseDetailPage() {
           onSubmit={onBatchSubmit}
           batch={editingBatch}
           courseId={currentCourse.id}
-          allSubjects={currentCourse.subjects}
         />
       </Modal>
 
