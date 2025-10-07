@@ -59,11 +59,11 @@ export const updateCourse = createAsyncThunk<
   Course,
   Partial<Course>,
   { rejectValue: string }
->("courses/updateCourse", async (courseData, { rejectWithValue }) => {
+>("courses/updateCourse", async (courseData, { rejectValue }) => {
   try {
-    // FIX: Destructure id from courseData and use it in the URL.
-    const { id, ...data } = courseData;
-    const response = await api.put(`/courses/${id}`, data);
+    // FIX: Destructure read-only fields to exclude them from the request body.
+    const { id, slug, createdAt, updatedAt, batches, subjects, teacher, ...dataToUpdate } = courseData;
+    const response = await api.put(`/courses/${id}`, dataToUpdate);
     return response.data.data;
   } catch (err: unknown) {
     const error = err as AxiosError<KnownError>;
