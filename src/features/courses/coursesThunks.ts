@@ -61,8 +61,9 @@ export const updateCourse = createAsyncThunk<
   { rejectValue: string }
 >("courses/updateCourse", async (courseData, { rejectWithValue }) => {
   try {
-    // FIX: Destructure and remove all fields not in the backend's update schema.
-    const { id, slug, batches, subjects, createdAt, updatedAt, teacher, ...dataToUpdate } = courseData;
+    // FIX: Destructure and only send fields allowed by the backend's update schema.
+    const { id, name, description, imageUrl } = courseData;
+    const dataToUpdate = { name, description, imageUrl };
     const response = await api.put(`/courses/${id}`, dataToUpdate);
     return response.data.data;
   } catch (err: unknown) {

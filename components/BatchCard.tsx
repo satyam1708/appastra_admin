@@ -71,7 +71,11 @@ export default function BatchCard({ batch, refetchCourse, onEdit, onDelete }: Ba
   const openClassModal = (ctx: { type: 'subject', id: string, name: string }, classToEdit: Class | null = null) => {
     setContext(ctx);
     setEditingClass(classToEdit);
-    resetClassForm(classToEdit || {});
+    resetClassForm(classToEdit ? {
+      ...classToEdit,
+      startTime: classToEdit.startTime ? new Date(classToEdit.startTime).toISOString().split('T')[0] : '',
+      endTime: classToEdit.endTime ? new Date(classToEdit.endTime).toISOString().split('T')[0] : '',
+    } : {});
     setIsClassModalOpen(true);
   };
 
@@ -141,6 +145,20 @@ export default function BatchCard({ batch, refetchCourse, onEdit, onDelete }: Ba
           <input {...classRegister('title')} placeholder="Class Title" className="w-full p-2 border rounded-md" required />
           <textarea {...classRegister('description')} placeholder="Class Description" className="w-full p-2 border rounded-md" />
           <input {...classRegister('videoUrl')} placeholder="Video URL" className="w-full p-2 border rounded-md" />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Start Time</label>
+              <input type="datetime-local" {...classRegister('startTime')} className="w-full p-2 border rounded-md" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">End Time</label>
+              <input type="datetime-local" {...classRegister('endTime')} className="w-full p-2 border rounded-md" />
+            </div>
+          </div>
+          <div className="flex items-center">
+            <input type="checkbox" {...classRegister('isLive')} className="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+            <label className="ml-2 block text-sm text-gray-900">Is this a live class?</label>
+          </div>
           <button type="submit" className="px-4 py-2 bg-primary text-primary-foreground rounded-md">{editingClass ? 'Update' : 'Add'}</button>
         </form>
       </Modal>

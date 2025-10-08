@@ -24,7 +24,6 @@ export const createClass = createAsyncThunk<Class, Partial<Class>, { rejectValue
   'classes/create',
   async (classData, { rejectWithValue }) => {
     try {
-      // FIX: Destructure subjectId and send the rest of the data in the body.
       const { subjectId, ...data } = classData;
       const response = await api.post(`/classes/subject/${subjectId}`, data);
       return response.data.data;
@@ -39,8 +38,23 @@ export const updateClass = createAsyncThunk<Class, Partial<Class>, { rejectValue
   'classes/update',
   async (classData, { rejectWithValue }) => {
     try {
-      // FIX: Remove non-editable fields.
-      const { id, subjectId, ...dataToUpdate } = classData;
+      // FIX: Explicitly pick only the fields allowed by the backend validation schema.
+      const { id, title, description, videoUrl, isLive, startTime, endTime } = classData;
+      
+      const dataToUpdate: Partial<Class> = {
+          title,
+          description,
+          videoUrl,
+          isLive,
+      };
+
+      if (startTime) {
+        dataToUpdate.startTime = new Date(startTime).toISOString();
+      }
+      if (endTime) {
+        dataToUpdate.endTime = new Date(endTime).toISOString();
+      }
+      
       const response = await api.put(`/classes/${id}`, dataToUpdate);
       return response.data.data;
     } catch (err: unknown) {

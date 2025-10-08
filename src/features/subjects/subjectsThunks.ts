@@ -22,7 +22,7 @@ export const fetchSubjectsByCourse = createAsyncThunk<Subject[], string, { rejec
 );
 export const createSubject = createAsyncThunk<Subject, Partial<Subject> & { batchId: string }, { rejectValue: string }>(
   'subjects/create',
-  async (subjectData, { rejectValue }) => {
+  async (subjectData, { rejectWithValue }) => {
     const { batchId, ...data } = subjectData;
     try {
       const response = await api.post(`/subjects/batch/${batchId}`, data);
@@ -38,8 +38,10 @@ export const updateSubject = createAsyncThunk<Subject, Partial<Subject>, { rejec
   'subjects/update',
   async (subjectData, { rejectWithValue }) => {
     try {
-      // FIX: Remove non-editable fields.
-      const { id, classes, resources, ...dataToUpdate } = subjectData;
+      // FIX: Only include 'name' and 'description' for updates.
+      const { id, name, description } = subjectData;
+      const dataToUpdate = { name, description };
+
       const response = await api.put(`/subjects/${id}`, dataToUpdate);
       return response.data.data;
     } catch (err: unknown) {

@@ -12,7 +12,15 @@ export const createBatch = createAsyncThunk<Batch, Partial<Batch>, { rejectValue
   'batches/create',
   async (batchData, { rejectWithValue }) => {
     try {
-      const response = await api.post('/batches', batchData);
+      const dataToSend = {
+        ...batchData,
+        startDate: batchData.startDate ? new Date(batchData.startDate).toISOString() : undefined,
+        endDate: batchData.endDate ? new Date(batchData.endDate).toISOString() : undefined,
+        price: batchData.price ? parseFloat(batchData.price as any) : undefined,
+        mrp: batchData.mrp ? parseFloat(batchData.mrp as any) : undefined,
+      };
+
+      const response = await api.post('/batches', dataToSend);
       return response.data.data;
     } catch (err: unknown) {
       const error = err as AxiosError<KnownError>;
@@ -25,15 +33,23 @@ export const updateBatch = createAsyncThunk<Batch, Partial<Batch>, { rejectValue
   'batches/update',
   async (batchData, { rejectWithValue }) => {
     try {
-      // FIX: Remove non-editable fields from the batch data payload.
-      const { id, subjects, classes, ...dataToUpdate } = batchData;
+      // FIX: Explicitly pick only the fields allowed by the backend validation schema.
+      const { id, name, description, startDate, endDate, isPaid, price, mrp, imageUrl } = batchData;
       
-      // Also ensure price and mrp are numbers
-      if (dataToUpdate.price) {
-        dataToUpdate.price = parseFloat(dataToUpdate.price as any);
+      const dataToUpdate: Partial<Batch> = {
+        name,
+        description,
+        isPaid,
+        price: price ? parseFloat(price as any) : undefined,
+        mrp: mrp ? parseFloat(mrp as any) : undefined,
+        imageUrl,
+      };
+
+      if (startDate) {
+        dataToUpdate.startDate = new Date(startDate).toISOString();
       }
-      if (dataToUpdate.mrp) {
-        dataToUpdate.mrp = parseFloat(dataToUpdate.mrp as any);
+      if (endDate) {
+        dataToUpdate.endDate = new Date(endDate).toISOString();
       }
 
       const response = await api.put(`/batches/${id}`, dataToUpdate);
