@@ -1,10 +1,10 @@
 // src/features/subjects/subjectsSlice.ts
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Subject } from '@/src/types';
-import { fetchSubjectsByCourse,createSubject, updateSubject, deleteSubject } from './subjectsThunks';
+import { fetchSubjectsByCourse, createSubject, updateSubject, deleteSubject } from './subjectsThunks';
 
 interface SubjectsState {
-  subjectsByCourse: Record<string, Subject[]>;
+  subjectsByCourse: { [courseId: string]: Subject[] };
   loading: boolean;
   error: string | null;
 }
@@ -23,29 +23,45 @@ const subjectsSlice = createSlice({
     builder
       .addCase(fetchSubjectsByCourse.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
       .addCase(fetchSubjectsByCourse.fulfilled, (state, action) => {
+        const { courseId, subjects } = action.payload;
+        state.subjectsByCourse[courseId] = subjects;
         state.loading = false;
-        state.subjectsByCourse[action.meta.arg] = action.payload;
       })
       .addCase(fetchSubjectsByCourse.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.payload || 'Failed to fetch subjects';
       })
-      .addCase(createSubject.fulfilled, (state, action) => {
-        const { courseId } = action.meta.arg;
+      // FIX: Handle the new payload structure from the createSubject thunk
+      .addCase(createSubject.fulfilled, (state, action: PayloadAction<{ subject: Subject; courseId: string }>) => {
+        const { subject, courseId } = action.payload;
         if (state.subjectsByCourse[courseId]) {
-          state.subjectsByCourse[courseId].push(action.payload);
+          state.subjectsByCourse[courseId].push(subject);
         } else {
-          state.subjectsByCourse[courseId] = [action.payload];
+          // In case the subject list for this course wasn't loaded yet
+          state.subjectsByCourse[courseId] = [subject];
         }
       })
       .addCase(updateSubject.fulfilled, (state, action) => {
-        // This is handled by refetching the course
+        const updatedSubject = action.payload;
+        // Find which course this subject belongs to and update it
+        for (const courseId in state.subjectsByCourse) {
+          const subjectIndex = state.subjectsByCourse[courseId].findIndex(s => s.id === updatedSubject.id);
+          if (subjectIndex !== -1) {
+            state.subjectsByCourse[courseId][subjectIndex] = updatedSubject;
+            break;
+          }
+        }
       })
       .addCase(deleteSubject.fulfilled, (state, action) => {
-        // This is handled by refetching the course
+        const deletedSubjectId = action.meta.arg;
+        // Find and remove the subject from whichever course it belongs to
+        for (const courseId in state.subjectsByCourse) {
+          state.subjectsByCourse[courseId] = state.subjectsByCourse[courseId].filter(
+            s => s.id !== deletedSubjectId
+          );
+        }
       });
   },
 });
