@@ -15,7 +15,7 @@ import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import Modal from '@/components/Modal';
 import { Batch } from '@/src/types';
 import BatchForm from '@/components/BatchForm';
-import BatchCard from '@/components/BatchCard';
+import {BatchCard} from '@/components/BatchCard';
 
 export default function CourseDetailPage() {
   const dispatch = useDispatch<AppDispatch>();
