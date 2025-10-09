@@ -12,13 +12,19 @@ interface GoLiveModalProps {
 const GoLiveModal: React.FC<GoLiveModalProps> = ({ session, onClose, onEndSession }) => {
   // Your RTMP base URL from the .env file
   const rtmpBaseUrl = "rtmp://3.89.59.9/live";
-  // The stream key is the unique part of the ingestUrl
-  const streamKey = session.ingestUrl.replace(rtmpBaseUrl + '/', '');
+  
+  // ✅ FIX: Use session.ingestUrl and add a safeguard
+  const streamKey = session.ingestUrl ? session.ingestUrl.replace(rtmpBaseUrl + '/', '') : '';
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     // You could add a small toast notification here for user feedback
   };
+
+  if (!session.ingestUrl) {
+    // Render nothing or a loading/error state if the URL isn't ready
+    return null; 
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

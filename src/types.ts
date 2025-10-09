@@ -117,7 +117,7 @@ export interface Lead {
 export interface LiveSession {
   id: string;
   classId: string;
-  sessionUrl: string;
+  ingestUrl: string; // ✅ RENAMED from sessionUrl
   playbackUrl?: string;
   startedAt: string;
   endedAt?: string;
