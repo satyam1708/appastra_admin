@@ -10,11 +10,12 @@ import { createLiveSession, endLiveSession } from '@/src/features/live/liveThunk
 import { clearActiveSession } from '@/src/features/live/liveSlice';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { PlusCircle, PlayCircle, Edit, Trash2, Video } from 'lucide-react';
-import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import Modal from '@/components/Modal';
 import GoLiveModal from './GoLiveModal';
 import { Subject, Class as ClassType, Batch } from '@/src/types';
 import HlsPlayer from './HlsPlayer';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
+
 
 // A simple reusable form for Subjects
 const SubjectForm = ({ onSubmit, subject }: { onSubmit: SubmitHandler<Partial<Subject>>; subject: Partial<Subject> | null; }) => {
@@ -64,7 +65,7 @@ interface BatchCardProps {
   onDelete: (item: { type: 'batch' | 'subject' | 'class', id: string, name: string }) => void;
 }
 
-const BatchCard: React.FC<BatchCardProps> = ({ batch, refetchCourse, onEdit, onDelete }) => {
+export const BatchCard: React.FC<BatchCardProps> = ({ batch, refetchCourse, onEdit, onDelete }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { activeSession } = useSelector((state: RootState) => state.live);
 
@@ -228,5 +229,5 @@ const BatchCard: React.FC<BatchCardProps> = ({ batch, refetchCourse, onEdit, onD
       )}
     </div>
   );
-}
+};
 
