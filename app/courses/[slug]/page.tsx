@@ -40,21 +40,32 @@ export default function CourseDetailPage() {
   }, [dispatch, slug]);
 
   const onBatchSubmit = (data: FieldValues) => {
-    const batchData = {
-      ...editingBatch,
+    // This part is for creating a new batch, it remains the same.
+    const batchPayload = {
       ...data,
       courseId: currentCourse!.id,
       startDate: new Date(data.startDate).toISOString(),
     };
-    const promise = editingBatch
-      ? dispatch(updateBatch(batchData))
-      : dispatch(createBatch(batchData));
+
+    let promise;
+
+    if (editingBatch) {
+      // FIX: When updating, structure the data correctly for the updateBatch thunk.
+      promise = dispatch(updateBatch({
+        id: editingBatch.id,
+        data: batchPayload
+      }));
+    } else {
+      // This is for creating a new batch
+      promise = dispatch(createBatch(batchPayload));
+    }
 
     promise.then(() => {
       closeBatchModal();
       refetchCourse();
     });
   };
+
 
   const openBatchModal = (batch: Batch | null = null) => {
     setEditingBatch(batch);
