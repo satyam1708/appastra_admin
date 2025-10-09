@@ -1,7 +1,7 @@
 // src/features/courses/coursesSlice.ts
-import { createSlice } from "@reduxjs/toolkit";
-import { fetchCourses, fetchCourseBySlug, createCourse, updateCourse, deleteCourse } from "./coursesThunks";
-import { Course } from "@/src/types"; // ✅ IMPORT the correct Course type
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { Course } from '@/src/types';
+import { fetchCourses, fetchCourseBySlug, createCourse, updateCourse, deleteCourse } from './coursesThunks';
 
 interface CoursesState {
   courses: Course[];
@@ -18,55 +18,57 @@ const initialState: CoursesState = {
 };
 
 const coursesSlice = createSlice({
-  name: "courses",
+  name: 'courses',
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // Fetch all courses
       .addCase(fetchCourses.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchCourses.fulfilled, (state, action) => {
+      .addCase(fetchCourses.fulfilled, (state, action: PayloadAction<Course[]>) => {
         state.loading = false;
         state.courses = action.payload;
       })
       .addCase(fetchCourses.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.payload || 'Failed to fetch courses';
       })
+      // Fetch single course by slug
       .addCase(fetchCourseBySlug.pending, (state) => {
         state.loading = true;
-        state.currentCourse = null;
+        state.error = null;
       })
-      .addCase(fetchCourseBySlug.fulfilled, (state, action) => {
+      .addCase(fetchCourseBySlug.fulfilled, (state, action: PayloadAction<Course>) => {
         state.loading = false;
         state.currentCourse = action.payload;
       })
       .addCase(fetchCourseBySlug.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.payload || 'Failed to fetch course';
       })
-      .addCase(createCourse.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(createCourse.fulfilled, (state, action) => {
-        state.loading = false;
+      // Create course
+      .addCase(createCourse.fulfilled, (state, action: PayloadAction<Course>) => {
         state.courses.push(action.payload);
       })
-      .addCase(createCourse.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      })
-      .addCase(updateCourse.fulfilled, (state, action) => {
+      // Update course
+      .addCase(updateCourse.fulfilled, (state, action: PayloadAction<Course>) => {
         const index = state.courses.findIndex(course => course.id === action.payload.id);
         if (index !== -1) {
           state.courses[index] = action.payload;
         }
+        if (state.currentCourse?.id === action.payload.id) {
+          state.currentCourse = action.payload;
+        }
       })
+      // Delete course
       .addCase(deleteCourse.fulfilled, (state, action) => {
-        state.courses = state.courses.filter(course => course.id !== action.payload);
-      });;
+        // FIX: Filter by the slug passed to the thunk, which is in action.meta.arg
+        const deletedSlug = action.meta.arg;
+        state.courses = state.courses.filter(course => course.slug !== deletedSlug);
+      });
   },
 });
 
