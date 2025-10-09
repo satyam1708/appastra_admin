@@ -40,10 +40,24 @@ export default function CoursesPage() {
   };
 
   const handleFormSubmit = (data: Partial<Course>) => {
-    const promise = selectedCourse
-      ? // FIX: Structure the argument correctly with 'slug' and 'data' properties
-        dispatch(updateCourse({ slug: selectedCourse.slug, data }))
-      : dispatch(createCourse(data));
+    let promise;
+
+    if (selectedCourse) {
+      promise = dispatch(updateCourse({ slug: selectedCourse.slug, data }));
+    } else {
+      // FIX: Ensure the 'name' property is present and correctly typed.
+      // The form validation makes 'name' required, so we can assert it's not null.
+      if (!data.name) {
+        // Optional: Handle the unlikely case where name is missing
+        console.error("Course name is required.");
+        return;
+      }
+      promise = dispatch(createCourse({
+        name: data.name,
+        description: data.description,
+        imageUrl: data.imageUrl,
+      }));
+    }
 
     promise.then(() => {
       dispatch(fetchCourses());
