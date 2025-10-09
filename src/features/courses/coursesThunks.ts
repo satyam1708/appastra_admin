@@ -1,29 +1,42 @@
 // src/features/courses/coursesThunks.ts
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import api from "@/src/lib/api"; // 👈 Import your configured api instance
+import api from "@/src/lib/api";
 import { Course } from "@/src/types";
 import { AxiosError } from "axios";
+
+// Define a type for the data needed to create a course
+interface CreateCourseData {
+  name: string;
+  description?: string;
+  imageUrl?: string;
+}
+
+// Define a type for the data needed to update a course
+interface UpdateCourseData {
+  slug: string;
+  data: Partial<CreateCourseData>; // Use Partial as not all fields are required for an update
+}
 
 interface KnownError {
   message: string;
 }
 
-export const fetchCourses = createAsyncThunk(
-  "courses/fetchCourses",
-  async (_, { rejectWithValue }) => {
-    try {
-      // No need to manually get token, the api interceptor handles it
-      const res = await api.get("/courses");
-      return res.data.data;
-    } catch (err: unknown) {
-      const error = err as AxiosError<KnownError>;
-      return rejectWithValue(
-        error.response?.data?.message || "Failed to fetch courses"
-      );
-    }
+export const fetchCourses = createAsyncThunk<
+  Course[],
+  void,
+  { rejectValue: string }
+>("courses/fetchCourses", async (_, { rejectWithValue }) => {
+  try {
+    const response = await api.get("/courses");
+    return response.data.data;
+  } catch (err: unknown) {
+    const error = err as AxiosError<KnownError>;
+    return rejectWithValue(
+      error.response?.data?.message || "Failed to fetch courses"
+    );
   }
-);
-// 👇 Add this new thunk to fetch a course by its slug
+});
+
 export const fetchCourseBySlug = createAsyncThunk<
   Course,
   string,
@@ -42,7 +55,7 @@ export const fetchCourseBySlug = createAsyncThunk<
 
 export const createCourse = createAsyncThunk<
   Course,
-  Partial<Course>,
+  CreateCourseData, // Changed from any
   { rejectValue: string }
 >("courses/createCourse", async (courseData, { rejectWithValue }) => {
   try {
@@ -55,16 +68,14 @@ export const createCourse = createAsyncThunk<
     );
   }
 });
+
 export const updateCourse = createAsyncThunk<
   Course,
-  Partial<Course>,
+  UpdateCourseData, // Changed from { slug: string; data: any }
   { rejectValue: string }
->("courses/updateCourse", async (courseData, { rejectWithValue }) => {
+>("courses/updateCourse", async ({ slug, data }, { rejectWithValue }) => {
   try {
-    // FIX: Destructure and only send fields allowed by the backend's update schema.
-    const { id, name, description, imageUrl } = courseData;
-    const dataToUpdate = { name, description, imageUrl };
-    const response = await api.put(`/courses/${id}`, dataToUpdate);
+    const response = await api.put(`/courses/${slug}`, data);
     return response.data.data;
   } catch (err: unknown) {
     const error = err as AxiosError<KnownError>;
@@ -75,13 +86,12 @@ export const updateCourse = createAsyncThunk<
 });
 
 export const deleteCourse = createAsyncThunk<
-  string,
+  void,
   string,
   { rejectValue: string }
->("courses/deleteCourse", async (courseId, { rejectWithValue }) => {
+>("courses/deleteCourse", async (slug, { rejectWithValue }) => {
   try {
-    await api.delete(`/courses/${courseId}`);
-    return courseId;
+    await api.delete(`/courses/${slug}`);
   } catch (err: unknown) {
     const error = err as AxiosError<KnownError>;
     return rejectWithValue(
