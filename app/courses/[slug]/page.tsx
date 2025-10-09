@@ -17,26 +17,13 @@ import { Batch } from '@/src/types';
 import BatchForm from '@/components/BatchForm';
 import BatchCard from '@/components/BatchCard';
 
-// Define a specific type for the batch form data
-interface BatchFormData {
-  name: string;
-  description?: string;
-  startDate: string;
-  endDate?: string;
-  isPaid?: boolean;
-  price?: number;
-  mrp?: number;
-  imageUrl?: string;
-}
-
 export default function CourseDetailPage() {
   const dispatch = useDispatch<AppDispatch>();
   const params = useParams();
   const { slug } = params;
   const { currentCourse, loading, error } = useSelector((state: RootState) => state.courses);
 
-  // Use the specific form data type with useForm
-  const { reset: resetBatchForm } = useForm<BatchFormData>();
+  const { reset: resetBatchForm } = useForm();
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingBatch, setEditingBatch] = useState<Batch | null>(null);
@@ -52,26 +39,27 @@ export default function CourseDetailPage() {
     refetchCourse();
   }, [dispatch, slug]);
 
-  // Use the specific form data type in the submit handler
-  const onBatchSubmit = (data: BatchFormData) => {
+  // FIX: Change the data type to 'Partial<Batch>' to match the form's output.
+  const onBatchSubmit = (data: Partial<Batch>) => {
+    // We can now construct the payload with confidence, as the form enforces required fields.
+    const batchPayload = {
+      name: data.name!, // Add '!' to assert that name will not be null here
+      description: data.description,
+      startDate: new Date(data.startDate!).toISOString(),
+      endDate: data.endDate ? new Date(data.endDate).toISOString() : undefined,
+      isPaid: data.isPaid,
+      price: data.price,
+      mrp: data.mrp,
+      imageUrl: data.imageUrl,
+      courseId: currentCourse!.id,
+    };
+
     let promise;
 
     if (editingBatch) {
-      // For updates, create the payload with the required structure
-      const updatePayload = {
-        ...data,
-        courseId: currentCourse!.id,
-        startDate: new Date(data.startDate).toISOString(),
-      };
-      promise = dispatch(updateBatch({ id: editingBatch.id, data: updatePayload }));
+      promise = dispatch(updateBatch({ id: editingBatch.id, data: batchPayload }));
     } else {
-      // For creation, the payload is now correctly typed
-      const createPayload = {
-        ...data,
-        courseId: currentCourse!.id,
-        startDate: new Date(data.startDate).toISOString(),
-      };
-      promise = dispatch(createBatch(createPayload));
+      promise = dispatch(createBatch(batchPayload));
     }
 
     promise.then(() => {
