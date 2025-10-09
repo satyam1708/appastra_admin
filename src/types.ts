@@ -21,19 +21,16 @@ export interface Batch {
   imageUrl?: string;
   subjects?: Subject[];
   classes?: Class[];
+  courseId: string;
 }
 
 export interface Course {
   id: string;
   name: string;
   description?: string;
-  isPaid: boolean;
-  price?: number;
   slug: string;
   imageUrl?: string;
-  subjects: Subject[];
   batches: Batch[];
-  teacher?: { name: string; };
 }
 
 export interface Subject {
@@ -42,6 +39,7 @@ export interface Subject {
   description?: string;
   classes?: Class[];
   resources?: Resource[];
+  batchId: string;
 }
 
 export interface Resource {
@@ -61,15 +59,13 @@ export interface Class {
   isLive: boolean;
   startTime?: string;
   endTime?: string;
-  subjectId?: string;
+  subjectId: string;
 }
 
 export interface Enrollment {
   id: string;
   userId: string;
-  courseId: string;
-  batchId?: string;
-  course: Course;
+  batchId: string;
   batch?: Batch;
 }
 
@@ -187,7 +183,7 @@ export interface Progress {
   userId: string;
   classId?: string;
   subjectId?: string;
-  courseId?: string;
+  batchId?: string;
 }
 
 export interface Coupon {
