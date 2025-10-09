@@ -60,6 +60,7 @@ export interface Class {
   startTime?: string;
   endTime?: string;
   subjectId: string;
+  liveSessions?: LiveSession[]; // ✅ ADD THIS LINE
 }
 
 export interface Enrollment {

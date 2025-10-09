@@ -20,3 +20,35 @@ export const fetchLiveSessions = createAsyncThunk<LiveSession[], string, { rejec
     }
   }
 );
+// ✅ ADD THIS NEW THUNK
+export const createLiveSession = createAsyncThunk<LiveSession, string, { rejectValue: string }>(
+  'live/createSession',
+  async (classId, { rejectWithValue }) => {
+    try {
+      const response = await api.post(`/live/${classId}/livesessions`, {
+        // The backend requires a startedAt timestamp
+        startedAt: new Date().toISOString(),
+      });
+      return response.data.data;
+    } catch (err: unknown) {
+      const error = err as AxiosError<KnownError>;
+      return rejectWithValue(error.response?.data?.message || 'Failed to start live session');
+    }
+  }
+);
+
+// ✅ ADD THIS THUNK TO END THE SESSION
+export const endLiveSession = createAsyncThunk<LiveSession, string, { rejectValue: string }>(
+  'live/endSession',
+  async (sessionId, { rejectWithValue }) => {
+    try {
+      const response = await api.patch(`/live/livesessions/${sessionId}/end`, {
+        endedAt: new Date().toISOString(),
+      });
+      return response.data.data;
+    } catch (err: unknown) {
+      const error = err as AxiosError<KnownError>;
+      return rejectWithValue(error.response?.data?.message || 'Failed to end session');
+    }
+  }
+);

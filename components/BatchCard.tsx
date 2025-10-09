@@ -2,25 +2,30 @@
 "use client";
 
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '@/src/store/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/src/store/store';
 import { createSubject, updateSubject, deleteSubject } from '@/src/features/subjects/subjectsThunks';
 import { createClass, updateClass, deleteClass } from '@/src/features/classes/classesThunks';
+import { createLiveSession, endLiveSession } from '@/src/features/live/liveThunks';
+import { clearActiveSession } from '@/src/features/live/liveSlice';
 import { useForm, FieldValues } from 'react-hook-form';
-import { PlusCircle, PlayCircle, Edit, Trash2 } from 'lucide-react';
+import { PlusCircle, PlayCircle, Edit, Trash2, Video } from 'lucide-react';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import Modal from '@/components/Modal';
+import GoLiveModal from './GoLiveModal';
 import { Subject, Class, Batch } from '@/src/types';
+import HlsPlayer from './HlsPlayer';
 
 interface BatchCardProps {
   batch: Batch;
   refetchCourse: () => void;
   onEdit: (batch: Batch) => void;
-  onDelete: (item: { type: 'batch', id: string, name: string }) => void;
+  onDelete: (item: { type: 'batch' | 'subject' | 'class', id: string, name: string }) => void;
 }
 
 export default function BatchCard({ batch, refetchCourse, onEdit, onDelete }: BatchCardProps) {
   const dispatch = useDispatch<AppDispatch>();
+  const { activeSession } = useSelector((state: RootState) => state.live);
   const { register: subjectRegister, handleSubmit: handleSubjectSubmit, reset: resetSubjectForm } = useForm();
   const { register: classRegister, handleSubmit: handleClassSubmit, reset: resetClassForm } = useForm();
 
@@ -29,7 +34,7 @@ export default function BatchCard({ batch, refetchCourse, onEdit, onDelete }: Ba
   const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
   const [editingClass, setEditingClass] = useState<Class | null>(null);
   const [context, setContext] = useState<{ type: 'subject' | 'batch', id: string, name: string } | null>(null);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [playbackUrl, setPlaybackUrl] = useState<string | null>(null);
 
   const onSubjectSubmit = (data: FieldValues) => {
     const subjectData = { ...editingSubject, ...data };
@@ -48,7 +53,7 @@ export default function BatchCard({ batch, refetchCourse, onEdit, onDelete }: Ba
     const promise = editingClass
       ? dispatch(updateClass(classData))
       : dispatch(createClass({ subjectId: context!.id, ...data }));
-    
+
     promise.then(() => {
         closeClassModal();
         refetchCourse();
@@ -73,8 +78,8 @@ export default function BatchCard({ batch, refetchCourse, onEdit, onDelete }: Ba
     setEditingClass(classToEdit);
     resetClassForm(classToEdit ? {
       ...classToEdit,
-      startTime: classToEdit.startTime ? new Date(classToEdit.startTime).toISOString().split('T')[0] : '',
-      endTime: classToEdit.endTime ? new Date(classToEdit.endTime).toISOString().split('T')[0] : '',
+      startTime: classToEdit.startTime ? new Date(classToEdit.startTime).toISOString().slice(0, 16) : '',
+      endTime: classToEdit.endTime ? new Date(classToEdit.endTime).toISOString().slice(0, 16) : '',
     } : {});
     setIsClassModalOpen(true);
   };
@@ -83,6 +88,34 @@ export default function BatchCard({ batch, refetchCourse, onEdit, onDelete }: Ba
     setIsClassModalOpen(false);
     setEditingClass(null);
     setContext(null);
+  };
+
+  const handlePlayClick = (cls: Class) => {
+    if (cls.isLive && cls.liveSessions && cls.liveSessions.length > 0) {
+      const activeSession = cls.liveSessions.find(s => !s.endedAt);
+      if (activeSession && activeSession.playbackUrl) {
+        setPlaybackUrl(activeSession.playbackUrl);
+      } else {
+        setPlaybackUrl(cls.videoUrl || null);
+      }
+    } else {
+      setPlaybackUrl(cls.videoUrl || null);
+    }
+  };
+
+  const handleGoLive = (classId: string) => {
+    dispatch(createLiveSession(classId)).then(() => {
+      refetchCourse();
+    });
+  };
+
+  const handleEndLive = () => {
+    if (activeSession) {
+      dispatch(endLiveSession(activeSession.id)).then(() => {
+        dispatch(clearActiveSession());
+        refetchCourse();
+      });
+    }
   };
 
   return (
@@ -116,14 +149,26 @@ export default function BatchCard({ batch, refetchCourse, onEdit, onDelete }: Ba
               <ul className="list-circle list-inside ml-6 mt-1 text-sm text-muted-foreground">
                 {subject.classes?.map(cls => (
                   <li key={cls.id} className="flex items-center gap-2 justify-between">
-                      <span>
-                          {cls.title}
-                          {cls.videoUrl && <button onClick={() => setVideoUrl(cls.videoUrl!)} className="text-primary ml-2"><PlayCircle size={16} /></button>}
-                      </span>
-                      <div>
-                          <button onClick={() => openClassModal({ type: 'subject', id: subject.id, name: subject.name }, cls)} className="text-sm p-1"><Edit size={14} /></button>
-                          <button onClick={() => onDelete({type: 'class', id: cls.id, name: cls.title})} className="text-sm p-1 text-red-500"><Trash2 size={14} /></button>
-                      </div>
+                    <span>
+                      {cls.title}
+                      {cls.isLive && (
+                        <span className="ml-2 text-xs font-semibold bg-red-500 text-white px-2 py-0.5 rounded-full">
+                          LIVE
+                        </span>
+                      )}
+                      {(cls.videoUrl || (cls.isLive && cls.liveSessions && cls.liveSessions.length > 0)) && (
+                        <button onClick={() => handlePlayClick(cls)} className="text-primary ml-2">
+                          <PlayCircle size={16} />
+                        </button>
+                      )}
+                    </span>
+                    <div>
+                      <button onClick={() => handleGoLive(cls.id)} className="text-sm p-1 text-green-600" title="Go Live">
+                        <Video size={14} />
+                      </button>
+                      <button onClick={() => openClassModal({ type: 'subject', id: subject.id, name: subject.name }, cls)} className="text-sm p-1"><Edit size={14} /></button>
+                      <button onClick={() => onDelete({type: 'class', id: cls.id, name: cls.title})} className="text-sm p-1 text-red-500"><Trash2 size={14} /></button>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -163,14 +208,25 @@ export default function BatchCard({ batch, refetchCourse, onEdit, onDelete }: Ba
         </form>
       </Modal>
 
-        {/* Video Player Modal */}
-        {videoUrl && (
-            <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" onClick={() => setVideoUrl(null)}>
-                <div className="bg-background p-4 rounded-lg shadow-2xl" onClick={(e) => e.stopPropagation()}>
-                    <video src={videoUrl} controls autoPlay className="w-full max-w-4xl max-h-[80vh]"></video>
-                </div>
-            </div>
-        )}
+      {playbackUrl && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" onClick={() => setPlaybackUrl(null)}>
+          <div className="bg-background p-4 rounded-lg shadow-2xl w-full max-w-4xl" onClick={(e) => e.stopPropagation()}>
+            {playbackUrl.endsWith('.m3u8') ? (
+              <HlsPlayer src={playbackUrl} />
+            ) : (
+              <video src={playbackUrl} controls autoPlay className="w-full max-h-[80vh]"></video>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeSession && (
+        <GoLiveModal
+          session={activeSession}
+          onClose={() => dispatch(clearActiveSession())}
+          onEndSession={handleEndLive}
+        />
+      )}
     </div>
   );
 }
