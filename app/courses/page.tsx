@@ -45,10 +45,7 @@ export default function CoursesPage() {
     if (selectedCourse) {
       promise = dispatch(updateCourse({ slug: selectedCourse.slug, data }));
     } else {
-      // FIX: Ensure the 'name' property is present and correctly typed.
-      // The form validation makes 'name' required, so we can assert it's not null.
       if (!data.name) {
-        // Optional: Handle the unlikely case where name is missing
         console.error("Course name is required.");
         return;
       }
@@ -116,9 +113,10 @@ export default function CoursesPage() {
         onClose={closeModal}
         title={selectedCourse ? "Edit Course" : "Create New Course"}
       >
+        {/* FIX: Changed 'initialData' to 'course' and added the 'onCancel' prop */}
         <CourseForm
           onSubmit={handleFormSubmit}
-          initialData={selectedCourse}
+          course={selectedCourse}
           onCancel={closeModal}
         />
       </Modal>
