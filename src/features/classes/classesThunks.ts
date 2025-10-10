@@ -13,13 +13,13 @@ export const fetchClassesBySubject = createAsyncThunk<
   { subjectId: string; classes: ClassType[] },
   string,
   { rejectValue: string }
->("classes/fetchBySubject", async (subjectId, { rejectValue }) => {
+>("classes/fetchBySubject", async (subjectId, { rejectWithValue }) => {
   try {
     const response = await api.get(`/classes/subject/${subjectId}`);
     return { subjectId, classes: response.data.data };
   } catch (err: unknown) {
     const error = err as AxiosError<KnownError>;
-    return rejectValue(
+    return rejectWithValue(
       error.response?.data?.message || "Failed to fetch classes"
     );
   }
@@ -30,13 +30,13 @@ export const createClass = createAsyncThunk<
   ClassType,
   { subjectId: string; data: Partial<ClassType> },
   { rejectValue: string }
->("classes/createClass", async ({ subjectId, data }, { rejectValue }) => {
+>("classes/createClass", async ({ subjectId, data }, { rejectWithValue }) => {
   try {
     const response = await api.post(`/classes/subject/${subjectId}`, data);
     return response.data.data;
   } catch (err: unknown) {
     const error = err as AxiosError<KnownError>;
-    return rejectValue(
+    return rejectWithValue(
       error.response?.data?.message || "Failed to create class"
     );
   }
@@ -47,13 +47,13 @@ export const updateClass = createAsyncThunk<
   ClassType,
   { id: string; data: Partial<ClassType> },
   { rejectValue: string }
->("classes/updateClass", async ({ id, data }, { rejectValue }) => {
+>("classes/updateClass", async ({ id, data }, { rejectWithValue }) => {
   try {
     const response = await api.put(`/classes/${id}`, data);
     return response.data.data;
   } catch (err: unknown) {
     const error = err as AxiosError<KnownError>;
-    return rejectValue(
+    return rejectWithValue(
       error.response?.data?.message || "Failed to update class"
     );
   }
@@ -64,13 +64,13 @@ export const deleteClass = createAsyncThunk<
   string, // Return the deleted class's ID
   string,
   { rejectValue: string }
->("classes/deleteClass", async (id, { rejectValue }) => {
+>("classes/deleteClass", async (id, { rejectWithValue }) => {
   try {
     await api.delete(`/classes/${id}`);
     return id; // Return the ID on success for the reducer
   } catch (err: unknown) {
     const error = err as AxiosError<KnownError>;
-    return rejectValue(
+    return rejectWithValue(
       error.response?.data?.message || "Failed to delete class"
     );
   }
