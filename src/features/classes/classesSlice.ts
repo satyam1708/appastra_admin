@@ -32,7 +32,8 @@ const classesSlice = createSlice({
       })
       .addCase(fetchClassesBySubject.fulfilled, (state, action) => {
         state.loading = false;
-        state.classesBySubject[action.meta.arg] = action.payload;
+        // The payload is an object { subjectId, classes }, so we use action.payload.classes
+        state.classesBySubject[action.meta.arg] = action.payload.classes;
       })
       .addCase(fetchClassesBySubject.rejected, (state, action) => {
         state.loading = false;
